@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..700,70,1&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -37,7 +37,7 @@ body {
   background:
     radial-gradient(circle at 86% -10%, rgba(255, 95, 157, 0.22), transparent 32rem),
     radial-gradient(circle at 12% 16%, rgba(255, 214, 92, 0.24), transparent 24rem),
-    linear-gradient(180deg, #fff7f2 0%, #fff7f2 54%, #ffe6ef 100%);
+    linear-gradient(180deg, #f7f1ec 0%, #fff7f2 48%, #ffe6ef 100%);
 }
 
 body::before {
@@ -309,7 +309,7 @@ button:disabled {
 
 .hero-image-card {
   position: absolute;
-  inset: 2rem 0.5rem 4rem;
+  inset: 0.5rem 0;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 2rem;
@@ -373,6 +373,14 @@ button:disabled {
   padding: 1rem;
   font-size: 0.95rem;
   font-weight: 600;
+}
+
+.proof-card:nth-child(2n) {
+  background: #fff8cd;
+}
+
+.proof-card:nth-child(3n) {
+  background: #dff9f2;
 }
 
 .proof-card svg,
@@ -1267,7 +1275,7 @@ textarea {
 
   .hero-headline {
     @apply font-display font-normal leading-[1.04] tracking-tight text-foreground;
-    font-size: clamp(2.25rem, 1.1rem + 5vw, 4.75rem);
+    font-size: clamp(2.15rem, 0.95rem + 4.2vw, 4.25rem);
   }
 
   .hero-copy {
@@ -1288,8 +1296,8 @@ textarea {
   }
 
   .announcement-strip {
-    background: linear-gradient(90deg, #2a1f27 0%, #3a2530 50%, #2a1f27 100%);
-    color: #fff7f2;
+    background: #ef6246;
+    color: #fffdf8;
     font-family: inherit;
     font-size: 0.72rem;
     font-weight: 500;
@@ -1309,13 +1317,78 @@ textarea {
 .hero-stage {
   position: relative;
   width: 100%;
-  height: clamp(360px, 60vw, 620px);
+  height: clamp(320px, 56vw, 520px);
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .hero-stage {
-    height: clamp(480px, 44vw, 640px);
+    height: clamp(390px, 40vw, 540px);
   }
+}
+
+.hero-product-callout {
+  position: absolute;
+  left: clamp(1rem, 4vw, 2.5rem);
+  top: clamp(1rem, 4vw, 2.5rem);
+  z-index: 3;
+  display: grid;
+  max-width: min(17rem, 72%);
+  gap: 0.55rem;
+  border: 1px solid rgba(42, 31, 39, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.82);
+  padding: 1rem 1.2rem;
+  color: var(--foreground);
+  box-shadow: 0 20px 48px rgba(42, 31, 39, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.hero-product-callout span {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(1.15rem, 1vw + 1rem, 1.7rem);
+  line-height: 1;
+}
+
+.hero-product-callout strong {
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.hero-product-callout button {
+  width: fit-content;
+  border-radius: 999px;
+  background: var(--foreground);
+  color: #fff7f2;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sundae-rhythm {
+  display: grid;
+  gap: clamp(1.3rem, 4vw, 2.5rem);
+  background: #f7f1ec;
+  padding: clamp(1.6rem, 5vw, 4.5rem) 1rem;
+  text-align: center;
+}
+
+.sundae-rhythm p {
+  max-width: 58rem;
+  margin: 0 auto;
+  color: var(--foreground);
+  font-size: clamp(1.75rem, 1.1rem + 2.6vw, 3.3rem);
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+.sundae-dot-row {
+  height: 1.1rem;
+  overflow: hidden;
+  background-image: radial-gradient(circle, rgba(42, 31, 39, 0.28) 0 5px, transparent 5.5px);
+  background-position: center;
+  background-size: 1.6rem 1rem;
 }
 
 /* Hero floaters: clamp-based offsets so the product renders stay

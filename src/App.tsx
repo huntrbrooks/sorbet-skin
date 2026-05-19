@@ -429,8 +429,8 @@ function Hero({ onBook: _onBook }: { onBook: () => void }) {
       <div className="whipped-shape left-[4%] top-20 h-20 w-20 sm:top-24 sm:h-32 sm:w-32" aria-hidden="true" />
       <div className="whipped-shape right-[6%] top-32 h-16 w-16 sm:right-[9%] sm:top-40 sm:h-24 sm:w-24" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-8 sm:gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
-        <div className="animate-fadeUp">
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-8 sm:gap-10 md:grid-cols-[0.85fr_1.15fr] lg:gap-12">
+        <div>
           <h1 className="hero-headline max-w-4xl">
             Vegan, cruelty-free bodycare for your juiciest glow.
           </h1>
@@ -469,9 +469,15 @@ function Hero({ onBook: _onBook }: { onBook: () => void }) {
               src="/assets/generated/sorbet-hero-lifestyle.png"
               alt="Sorbet Skin colourful self-tan and whipped bodycare collection on a bright bathroom counter"
               loading="eager"
+              fetchPriority="high"
               decoding="async"
             />
             <div className="hero-shine" aria-hidden="true" />
+            <div className="hero-product-callout">
+              <span>Sorbet Scent Stack</span>
+              <strong>Build your custom glow edit.</strong>
+              <button type="button" onClick={() => scrollToId('shop')}>Shop now</button>
+            </div>
           </div>
           <div className="hero-floater hero-floater--left hidden rotate-[-8deg] md:block">
             <ProductRender product={heroProducts[0]} size="lg" float />
@@ -486,6 +492,16 @@ function Hero({ onBook: _onBook }: { onBook: () => void }) {
           <div className="foam-stroke bottom-[12%] right-[9%]" aria-hidden="true" />
         </div>
       </div>
+    </section>
+  );
+}
+
+function SundaeRhythm() {
+  return (
+    <section className="sundae-rhythm" aria-label="Sorbet Skin brand promise">
+      <div className="sundae-dot-row" aria-hidden="true" />
+      <p>Vegan, Cruelty-Free and Super Fun Bodycare for Every Body.</p>
+      <div className="sundae-dot-row" aria-hidden="true" />
     </section>
   );
 }
@@ -2043,6 +2059,7 @@ export default function App() {
 
       <main>
         <Hero onBook={() => openBooking()} />
+        <SundaeRhythm />
         <SocialProofStrip />
         <BestSellersStory onAdd={addProduct} onQuickView={setQuickViewProduct} />
         <ShopPage onAdd={addProduct} onQuickView={setQuickViewProduct} />
