@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1400" role="img" aria-label="Champagne Blur Sorbet Skin product packaging">
+    <defs>
+    <linearGradient id="champagne-blur-body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE0A8"/>
+      <stop offset="0.36" stop-color="#E7A84E"/>
+      <stop offset="1" stop-color="#B87532"/>
+    </linearGradient>
+    <linearGradient id="champagne-blur-cap" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="0.52" stop-color="#FFF3DD"/>
+      <stop offset="1" stop-color="#E7A84E" stop-opacity="0.78"/>
+    </linearGradient>
+    <linearGradient id="champagne-blur-label" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFA" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FFF3DD" stop-opacity="0.72"/>
+    </linearGradient>
+    <radialGradient id="champagne-blur-glow" cx="50%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="champagne-blur-shadow" x="-40%" y="-40%" width="180%" height="190%">
+      <feDropShadow dx="0" dy="36" stdDeviation="26" flood-color="#6B412A" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+    <ellipse cx="512" cy="1190" rx="245" ry="58" fill="#6B412A" opacity="0.17"/>
+    <g filter="url(#champagne-blur-shadow)">
+      <g>
+    <clipPath id="champagne-blur-cap-clip"><path d="M392 442V278.2C392 210.16 440 190 512 190s120 20.16 120 88.19999999999999V442Z"/></clipPath>
+    <path d="M392 442V278.2C392 210.16 440 190 512 190s120 20.16 120 88.19999999999999V442Z" fill="url(#champagne-blur-cap)" stroke="#fff" stroke-width="6"/>
+    <g clip-path="url(#champagne-blur-cap-clip)"><rect x="418.40" y="207.64" width="22.44" height="196.56" rx="10.60" fill="#fff" opacity="0.34"/><rect x="452.06" y="207.64" width="22.44" height="196.56" rx="10.60" fill="#fff" opacity="0.2"/><rect x="485.72" y="207.64" width="22.44" height="196.56" rx="10.60" fill="#fff" opacity="0.34"/><rect x="519.39" y="207.64" width="22.44" height="196.56" rx="10.60" fill="#fff" opacity="0.2"/><rect x="553.05" y="207.64" width="22.44" height="196.56" rx="10.60" fill="#fff" opacity="0.34"/><rect x="586.71" y="207.64" width="22.44" height="196.56" rx="10.60" fill="#fff" opacity="0.2"/></g>
+    <rect x="384" y="391.6" width="256" height="45.36" rx="20.16" fill="#FFF3DD" stroke="#fff" stroke-width="5" opacity="0.96"/>
+  </g>
+      <rect x="370" y="398" width="284" height="760" rx="88" fill="url(#champagne-blur-body)" stroke="#fff" stroke-width="7"/>
+      <rect x="395.56" y="422" width="45.44" height="592.8000000000001" rx="36" fill="#fff" opacity="0.2"/>
+      <rect x="591.52" y="430" width="22.72" height="516.8000000000001" rx="22" fill="#302621" opacity="0.08"/>
+      <ellipse cx="512" cy="468" rx="102.24" ry="83.6" fill="url(#champagne-blur-glow)" opacity="0.85"/>
+      <rect x="406" y="610" width="212" height="336" rx="84" fill="url(#champagne-blur-label)" stroke="#fff" stroke-width="5" opacity="0.96"/>
+      <text x="512" y="666" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900" letter-spacing="4" fill="#6B412A" opacity="0.86">SORBET SKIN</text>
+      <text x="512" y="726" text-anchor="middle" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#6B412A">Champagne</text><text x="512" y="778" text-anchor="middle" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#6B412A">Blur</text>
+      <text x="512" y="834" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" fill="#6B412A" opacity="0.78">Bronzing Body Blur</text>
+      <text x="512" y="872" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="800" fill="#6B412A" opacity="0.62">Toasted Coconut</text>
+      <g transform="translate(478 874) scale(0.62)" fill="#FF8FBC" opacity="0.85">
+    <path d="M35 5c-13 7-20 18-18 30 2 10 13 14 25 18 11 3 18 7 18 15 0 8-7 15-22 20 24-2 39-13 39-29 0-13-11-20-28-25-12-3-18-7-17-14 1-6 7-11 16-15-4-1-8-1-13 0z"/>
+    <path d="M27 52c-12 4-20 12-20 23 0 13 12 23 34 25-11-5-17-11-17-18 0-9 9-15 24-20-7-5-14-8-21-10z" opacity="0.6"/>
+  </g>
+    </g>
+  </svg>

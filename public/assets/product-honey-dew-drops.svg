@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1400" role="img" aria-label="Honey Dew Drops Sorbet Skin product packaging">
+    <defs>
+    <linearGradient id="honey-dew-drops-body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EEFFF0"/>
+      <stop offset="0.36" stop-color="#BEE5C5"/>
+      <stop offset="1" stop-color="#7DAF78"/>
+    </linearGradient>
+    <linearGradient id="honey-dew-drops-cap" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="0.52" stop-color="#FFF3DD"/>
+      <stop offset="1" stop-color="#BEE5C5" stop-opacity="0.78"/>
+    </linearGradient>
+    <linearGradient id="honey-dew-drops-label" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFA" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FFF3DD" stop-opacity="0.72"/>
+    </linearGradient>
+    <radialGradient id="honey-dew-drops-glow" cx="50%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="honey-dew-drops-shadow" x="-40%" y="-40%" width="180%" height="190%">
+      <feDropShadow dx="0" dy="36" stdDeviation="26" flood-color="#6B412A" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+    <ellipse cx="512" cy="1190" rx="245" ry="58" fill="#6B412A" opacity="0.17"/>
+    <g filter="url(#honey-dew-drops-shadow)">
+      <g>
+    <clipPath id="honey-dew-drops-cap-clip"><path d="M392 446V322.5C392 271.2 440 256 512 256s120 15.200000000000001 120 66.5V446Z"/></clipPath>
+    <path d="M392 446V322.5C392 271.2 440 256 512 256s120 15.200000000000001 120 66.5V446Z" fill="url(#honey-dew-drops-cap)" stroke="#fff" stroke-width="6"/>
+    <g clip-path="url(#honey-dew-drops-cap-clip)"><rect x="418.40" y="269.30" width="22.44" height="148.20" rx="10.60" fill="#fff" opacity="0.34"/><rect x="452.06" y="269.30" width="22.44" height="148.20" rx="10.60" fill="#fff" opacity="0.2"/><rect x="485.72" y="269.30" width="22.44" height="148.20" rx="10.60" fill="#fff" opacity="0.34"/><rect x="519.39" y="269.30" width="22.44" height="148.20" rx="10.60" fill="#fff" opacity="0.2"/><rect x="553.05" y="269.30" width="22.44" height="148.20" rx="10.60" fill="#fff" opacity="0.34"/><rect x="586.71" y="269.30" width="22.44" height="148.20" rx="10.60" fill="#fff" opacity="0.2"/></g>
+    <rect x="384" y="408" width="256" height="34.199999999999996" rx="15.200000000000001" fill="#FFF3DD" stroke="#fff" stroke-width="5" opacity="0.96"/>
+  </g>
+      <rect x="370" y="428" width="284" height="650" rx="88" fill="url(#honey-dew-drops-body)" stroke="#fff" stroke-width="7"/>
+      <rect x="395.56" y="452" width="45.44" height="507" rx="36" fill="#fff" opacity="0.2"/>
+      <rect x="591.52" y="460" width="22.72" height="442.00000000000006" rx="22" fill="#302621" opacity="0.08"/>
+      <ellipse cx="512" cy="498" rx="102.24" ry="71.5" fill="url(#honey-dew-drops-glow)" opacity="0.85"/>
+      <rect x="406" y="585" width="212" height="310" rx="84" fill="url(#honey-dew-drops-label)" stroke="#fff" stroke-width="5" opacity="0.96"/>
+      <text x="512" y="641" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900" letter-spacing="4" fill="#4E6F3E" opacity="0.86">SORBET SKIN</text>
+      <text x="512" y="701" text-anchor="middle" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#4E6F3E">Honey</text><text x="512" y="753" text-anchor="middle" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#4E6F3E">Dew Drops</text>
+      <text x="512" y="809" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" fill="#4E6F3E" opacity="0.78">Face Tan Drops</text>
+      <text x="512" y="847" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="800" fill="#4E6F3E" opacity="0.62">Fragrance-free</text>
+      <g transform="translate(478 823) scale(0.62)" fill="#E7A84E" opacity="0.85">
+    <path d="M35 5c-13 7-20 18-18 30 2 10 13 14 25 18 11 3 18 7 18 15 0 8-7 15-22 20 24-2 39-13 39-29 0-13-11-20-28-25-12-3-18-7-17-14 1-6 7-11 16-15-4-1-8-1-13 0z"/>
+    <path d="M27 52c-12 4-20 12-20 23 0 13 12 23 34 25-11-5-17-11-17-18 0-9 9-15 24-20-7-5-14-8-21-10z" opacity="0.6"/>
+  </g>
+    </g>
+  </svg>

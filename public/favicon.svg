@@ -1,13 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sorbet Skin favicon">
   <defs>
-    <linearGradient id="sorbet" x1="8" x2="56" y1="10" y2="58" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFB38A"/>
-      <stop offset="0.5" stop-color="#FF8FBC"/>
-      <stop offset="1" stop-color="#B8A7FF"/>
+    <linearGradient id="body" x1="16" x2="48" y1="14" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE4D5"/>
+      <stop offset="0.5" stop-color="#FFB38A"/>
+      <stop offset="1" stop-color="#C9894B"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="20" x2="44" y1="6" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFA"/>
+      <stop offset="1" stop-color="#FFF3DD"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="22" fill="#FFF3DD"/>
-  <path d="M18 35c0-9.4 6.4-17 14.3-17 7.4 0 13.4 6.2 13.4 13.8 0 8.9-7.6 14.2-14.1 14.2H20.8A2.8 2.8 0 0 1 18 43.2V35Z" fill="url(#sorbet)"/>
-  <path d="M24 37c5.5 4 12.2 3.8 18.8-1.1" fill="none" stroke="#FFFDF6" stroke-width="4" stroke-linecap="round"/>
-  <path d="M25.5 27.6c2.5-3 6.4-4.1 10.1-2.5" fill="none" stroke="#FFFDF6" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+  <rect width="64" height="64" rx="18" fill="#FAFAF8"/>
+  <rect x="18" y="24" width="28" height="32" rx="9" fill="url(#body)" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M20 25V16c0-6 4.8-9 12-9s12 3 12 9v9Z" fill="url(#cap)" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M25 10v14M31 8v16M37 10v14" fill="none" stroke="#D4A84B" stroke-width="2.2" stroke-linecap="round" opacity="0.72"/>
+  <rect x="19" y="24" width="26" height="5" rx="2.5" fill="#FFF3DD"/>
+  <text x="32" y="45" text-anchor="middle" font-family="Georgia, serif" font-size="12" font-weight="700" fill="#6B412A">SS</text>
 </svg>

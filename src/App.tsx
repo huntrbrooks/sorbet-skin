@@ -128,42 +128,15 @@ function productById(id: string) {
 }
 
 function ProductRender({ product, size = 'md', float = false }: { product: Product; size?: 'xs' | 'sm' | 'md' | 'lg' | 'hero'; float?: boolean }) {
-  const variant =
-    product.category === 'Tool'
-      ? 'mitt'
-      : product.category === 'Face Drops'
-        ? 'drops'
-        : product.category === 'Prep Product'
-          ? 'prep'
-          : product.category === 'Instant Body Blur'
-            ? 'blur'
-            : product.category === 'Gradual Tanning Moisturiser'
-              ? 'cream'
-              : 'mousse';
-
   return (
     <div
-      className={cx('product-render', `product-render-${variant}`, `product-render-${size}`, float && 'animate-floaty')}
+      className={cx('product-render', `product-render-${size}`, float && 'animate-floaty')}
       style={{ '--accent': product.themeHex } as CSSProperties}
       role="img"
       aria-label={`${product.name} ${product.type} packaging mockup`}
     >
       <div className="product-glow" />
-      {variant === 'mitt' ? (
-        <div className="mitt-shape">
-          <div className="mitt-cuff">Sorbet Skin</div>
-        </div>
-      ) : (
-        <>
-          <div className="product-cap" />
-          <div className="product-body">
-            <div className="product-highlight" />
-            <span className="product-brand">SORBET SKIN</span>
-            <span className="product-name">{product.name}</span>
-            <span className="product-type">{product.type}</span>
-          </div>
-        </>
-      )}
+      <img className="product-asset" src={product.asset} alt="" aria-hidden="true" draggable={false} />
     </div>
   );
 }
@@ -174,14 +147,14 @@ function Rating({ value = 5 }: { value?: number }) {
       {Array.from({ length: 5 }).map((_, index) => (
         <Star key={index} size={15} className={index < Math.round(value) ? 'fill-honey text-honey' : 'text-caramel/30'} />
       ))}
-      <span className="ml-1 text-xs font-black">{value.toFixed(1)}</span>
+      <span className="ml-1 text-xs font-semibold">{value.toFixed(1)}</span>
     </div>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="grid gap-2 text-sm font-black text-cocoa">
+    <label className="grid gap-2 text-sm font-semibold text-foreground">
       {label}
       {children}
     </label>
@@ -203,7 +176,13 @@ function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
 function SectionHeading({ eyebrow, title, copy, align = 'center' }: { eyebrow?: string; title: string; copy?: string; align?: 'center' | 'left' }) {
   return (
     <div className={cx('section-heading', align === 'left' && 'section-heading-left')}>
-      {eyebrow && <p className="section-kicker">{eyebrow}</p>}
+      {eyebrow && (
+        <div className="section-label">
+          <span className="section-rule" />
+          <p className="section-kicker">{eyebrow}</p>
+          <span className="section-rule" />
+        </div>
+      )}
       <h2>{title}</h2>
       {copy && <p>{copy}</p>}
     </div>
@@ -219,7 +198,7 @@ function AnnouncementBar() {
   }, []);
 
   return (
-    <div className="bg-cocoa px-4 py-2 text-center text-xs font-black uppercase tracking-[0.08em] text-vanilla sm:text-sm">
+    <div className="bg-foreground px-4 py-2 text-center text-xs font-semibold uppercase text-background sm:text-sm">
       {announcementMessages[index]}
     </div>
   );
@@ -239,13 +218,13 @@ function Header({ cartCount, onCartOpen, onBook }: { cartCount: number; onCartOp
   };
 
   return (
-    <header className="border-b border-caramel/10 bg-vanilla/90 px-4 py-3 shadow-[0_10px_30px_rgba(107,65,42,0.08)] backdrop-blur-xl">
+    <header className="border-b border-border bg-background/92 px-4 py-3 shadow-editorial backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
         <button className="group flex items-center gap-3 text-left" onClick={() => scrollToId('top')} aria-label="Sorbet Skin home">
           <span className="brand-mark">SS</span>
           <span>
-            <span className="block font-display text-2xl font-semibold leading-none text-cocoa">Sorbet Skin</span>
-            <span className="block text-[11px] font-black uppercase tracking-[0.12em] text-caramel">Whipped glow, zero sun damage.</span>
+            <span className="block font-display text-2xl font-normal leading-none text-foreground">Sorbet Skin</span>
+            <span className="block text-[11px] font-semibold uppercase text-accent">Whipped glow, zero sun damage.</span>
           </span>
         </button>
 
@@ -275,16 +254,16 @@ function Header({ cartCount, onCartOpen, onBook }: { cartCount: number; onCartOp
       </div>
 
       {searchOpen && (
-        <div className="mx-auto mt-3 max-w-7xl rounded-[24px] border border-caramel/10 bg-white/90 p-3 shadow-soft">
-          <label className="flex items-center gap-3 rounded-full bg-vanilla px-4 py-3 text-sm font-bold text-charcoal/70">
-            <Search size={18} className="text-cocoa" />
+        <div className="mx-auto mt-3 max-w-7xl rounded-lg border border-border bg-card p-3 shadow-soft">
+          <label className="flex items-center gap-3 rounded-md bg-muted px-4 py-3 text-sm font-normal text-muted-foreground">
+            <Search size={18} className="text-accent" />
             <input className="w-full bg-transparent outline-none" placeholder="Search services, products, prep guides..." />
           </label>
         </div>
       )}
 
       {mobileOpen && (
-        <nav className="mx-auto mt-4 grid max-w-7xl gap-2 rounded-[28px] border border-caramel/10 bg-white/90 p-3 shadow-soft sm:grid-cols-2 xl:hidden" aria-label="Mobile navigation">
+        <nav className="mx-auto mt-4 grid max-w-7xl gap-2 rounded-lg border border-border bg-card p-3 shadow-soft sm:grid-cols-2 xl:hidden" aria-label="Mobile navigation">
           {navLinks.map(([label, id]) => (
             <button key={id} className="nav-link justify-start" onClick={() => handleNav(id)}>
               {label}
@@ -301,17 +280,17 @@ function Hero({ onBook }: { onBook: () => void }) {
   const heroProducts = ['peach-glaze', 'cocoa-drip', 'honey-dew-drops'].map(productById);
 
   return (
-    <section id="top" className="relative overflow-hidden bg-[radial-gradient(circle_at_12%_14%,rgba(255,179,138,0.36),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(184,167,255,0.32),transparent_26%),linear-gradient(135deg,#FFFFFA_0%,#FFF9EE_42%,#FFF3DD_100%)] px-4 pb-16 pt-10 sm:pb-20 lg:pb-24">
+    <section id="top" className="relative overflow-hidden bg-background px-4 pb-16 pt-14 sm:pb-20 lg:pb-28">
       <div className="bronze-ribbon animate-ribbon" />
       <div className="whipped-shape left-[4%] top-24 h-32 w-32 bg-white/58" />
-      <div className="whipped-shape right-[9%] top-40 h-24 w-24 bg-mint/60" />
+      <div className="whipped-shape right-[9%] top-40 h-24 w-24 bg-card/60" />
 
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="animate-fadeUp">
-          <h1 className="max-w-4xl font-display text-5xl font-semibold leading-[0.94] text-cocoa sm:text-6xl lg:text-7xl">
+          <h1 className="max-w-4xl font-display text-5xl font-normal leading-tight text-foreground sm:text-6xl lg:text-7xl">
             Melbourne's softest spray tan and whipped self-tan glow.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-charcoal/80 sm:text-xl">
+          <p className="mt-6 max-w-2xl text-lg font-normal leading-8 text-muted-foreground sm:text-xl">
             Expert studio tans, mobile appointments, bridal bronze, competition colour, and dessert-soft at-home self-tanning products designed for a streak-free glow without the fake tan smell.
           </p>
 
@@ -331,18 +310,18 @@ function Hero({ onBook }: { onBook: () => void }) {
 
           <div className="mt-8 flex flex-wrap gap-2">
             {badges.map((badge, index) => (
-              <span key={badge} className="badge-pill fade-badge bg-white/75 text-cocoa" style={{ animationDelay: `${index * 70}ms` }}>
+              <span key={badge} className="badge-pill fade-badge" style={{ animationDelay: `${index * 70}ms` }}>
                 <Sparkles size={14} />
                 {badge}
               </span>
             ))}
           </div>
-          <p className="mt-4 text-sm font-bold text-cocoa/70">{spfDisclaimer}</p>
+          <p className="mt-4 text-sm font-semibold text-muted-foreground">{spfDisclaimer}</p>
         </div>
 
         <div className="relative min-h-[440px] sm:min-h-[560px]">
           <div className="hero-image-card">
-            <img src="/Product Line.png" alt="Sorbet Skin pastel product range with whipped dessert-inspired self-tanning packaging" />
+            <img src="/assets/sorbet-product-line.svg" alt="Sorbet Skin original ribbed-cap self-tanning product range" />
             <div className="hero-shine" />
           </div>
           <div className="absolute -left-2 bottom-8 hidden rotate-[-8deg] sm:block">
@@ -401,7 +380,7 @@ function BookingPanel({ onBook }: { onBook: (service?: Service) => void }) {
                 </div>
                 <span className="price-pill">{service.price}</span>
               </div>
-              <div className="mt-5 flex flex-wrap gap-2 text-sm font-black text-cocoa/80">
+              <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-foreground/80">
                 <span className="mini-chip"><Clock size={14} /> {service.duration}</span>
                 <span className="mini-chip"><Sparkles size={14} /> {service.developmentTime}</span>
               </div>
@@ -503,7 +482,7 @@ function PackagesSection({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>, 
   const [gifted, setGifted] = useState<Record<string, boolean>>({});
 
   return (
-    <section id="packages" className="section-pad bg-gradient-to-br from-buttercream via-vanilla to-peach/20 px-4">
+    <section id="packages" className="section-pad bg-muted px-4">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Prepaid packages" title="Glow More, Pay Less" copy="Prepay for your studio tans, keep them for yourself, or gift the glow to someone who lives by calendar reminders." />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -512,8 +491,8 @@ function PackagesSection({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>, 
               {pack.badge && <span className="save-badge">{pack.badge}</span>}
               <h3 className="font-display text-3xl font-semibold text-cocoa">{pack.name}</h3>
               <p className="mt-3 text-sm font-bold text-charcoal/70">{pack.includes}</p>
-              <p className="mt-6 text-3xl font-black text-cocoa">{formatPrice(pack.price)}</p>
-              <label className="mt-5 flex items-center gap-3 rounded-full bg-white/70 px-4 py-3 text-sm font-black text-cocoa">
+              <p className="mt-6 font-display text-4xl font-normal text-foreground">{formatPrice(pack.price)}</p>
+              <label className="mt-5 flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground">
                 <input type="checkbox" checked={!!gifted[pack.id]} onChange={(event) => setGifted((current) => ({ ...current, [pack.id]: event.target.checked }))} />
                 Gift option
               </label>
@@ -527,7 +506,7 @@ function PackagesSection({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>, 
                       name: pack.name,
                       price: pack.price,
                       meta: `${pack.includes}${gifted[pack.id] ? ' | Gift option' : ''}`,
-                      accent: '#C9894B',
+                      accent: '#B8860B',
                     },
                     1,
                   )
@@ -561,7 +540,9 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
               Book Trial Tan
             </button>
           </div>
-          <div className="editorial-skin-frame bridal-skin" aria-label="Editorial bridal glow placeholder" />
+          <div className="editorial-skin-frame bridal-skin">
+            <img src="/assets/bridal-glow-editorial.svg" alt="Soft bridal spray tan glow editorial with Sorbet Skin product" />
+          </div>
         </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
@@ -598,7 +579,7 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
             <article key={pack.name} className="package-card">
               <h3 className="font-display text-2xl font-semibold text-cocoa">{pack.name}</h3>
               <p className="mt-3 text-sm font-bold leading-6 text-charcoal/70">{pack.includes}</p>
-              <p className="mt-5 text-2xl font-black text-caramel">{pack.price}</p>
+              <p className="mt-5 font-display text-3xl font-normal text-accent">{pack.price}</p>
             </article>
           ))}
         </div>
@@ -725,7 +706,7 @@ function CompetitionPage() {
                 ['Rinse instructions', 'Follow your personalised rinse timing and aftercare notes.'],
               ].map(([title, copy]) => (
                 <div key={title} className="rounded-[24px] bg-vanilla/80 p-4">
-                  <h3 className="font-black text-cocoa">{title}</h3>
+                  <h3 className="font-semibold text-foreground">{title}</h3>
                   <p className="mt-2 text-sm font-medium leading-6 text-charcoal/70">{copy}</p>
                 </div>
               ))}
@@ -764,7 +745,7 @@ function CompetitionPage() {
 function FilterGroup({ label, values, selected, onToggle }: { label: string; values: string[]; selected: string[]; onToggle: (value: string) => void }) {
   return (
     <div>
-      <h3 className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.08em] text-cocoa">
+      <h3 className="mb-3 flex items-center gap-2 font-mono text-xs font-medium uppercase text-foreground">
         <SlidersHorizontal size={15} />
         {label}
       </h3>
@@ -786,9 +767,9 @@ function ProductCard({ product, onAdd, onQuickView }: { product: Product; onAdd:
   return (
     <article className="product-card group">
       <div className="product-card-media">
-        <div className="absolute inset-x-8 top-10 h-20 rounded-full blur-2xl" style={{ backgroundColor: `${product.themeHex}36` }} />
+        <div className="absolute inset-x-8 top-10 h-20 rounded-full blur-2xl" style={{ backgroundColor: `${product.themeHex}22` }} />
         <ProductRender product={product} size="lg" />
-        <span className="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-black text-cocoa shadow-sm">Vegan + cruelty-free</span>
+        <span className="absolute left-4 top-4 rounded-md border border-border bg-card/90 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">Vegan + cruelty-free</span>
       </div>
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
@@ -810,7 +791,7 @@ function ProductCard({ product, onAdd, onQuickView }: { product: Product; onAdd:
         <div className="mt-5 flex items-center justify-between gap-3">
           <Rating value={product.rating} />
           <div className="flex gap-2">
-            <button className="small-button bg-buttercream text-cocoa hover:bg-peach/40" onClick={() => onQuickView(product)}>Quick view</button>
+            <button className="small-button bg-card text-foreground hover:bg-muted" onClick={() => onQuickView(product)}>Quick view</button>
             <button className="small-button bg-cocoa text-vanilla hover:bg-caramel" onClick={() => onAdd(product)}>Add to cart</button>
           </div>
         </div>
@@ -868,7 +849,7 @@ function ShopPage({ onAdd, onQuickView }: { onAdd: (product: Product, quantity?:
         </div>
 
         <div className="mt-7 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-black uppercase tracking-[0.08em] text-caramel">{filteredProducts.length} products</p>
+          <p className="font-mono text-sm font-medium uppercase text-accent">{filteredProducts.length} products</p>
           <p className="text-sm font-bold text-charcoal/70">Transfer-resistant claim applies once fully developed, rinsed, and dry.</p>
         </div>
 
@@ -904,7 +885,7 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="quick-view-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div className="modal-card max-w-5xl">
         <div className="grid gap-6 p-5 sm:p-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[30px] bg-gradient-to-br from-white via-buttercream to-peach/20 p-8">
+          <div className="rounded-lg border border-border bg-muted p-8">
             <ProductRender product={product} size="hero" />
           </div>
           <div>
@@ -930,7 +911,7 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
                 ['Development', product.developmentTime],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-[20px] bg-white/70 p-3">
-                  <dt className="font-black text-cocoa">{label}</dt>
+                  <dt className="font-semibold text-foreground">{label}</dt>
                   <dd className="mt-1 font-medium text-charcoal/70">{value}</dd>
                 </div>
               ))}
@@ -954,7 +935,7 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
                 <ol className="grid gap-3">
                   {product.howToUse.map((step, index) => (
                     <li key={step} className="flex gap-3 rounded-[20px] bg-white/70 p-3">
-                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-peach text-sm font-black text-cocoa">{index + 1}</span>
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-accent text-sm font-semibold text-accent-foreground">{index + 1}</span>
                       {step}
                     </li>
                   ))}
@@ -979,7 +960,7 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
             <div className="flex flex-col gap-3 rounded-[24px] bg-white/70 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <button className="quantity-button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity"><Minus size={18} /></button>
-                <span className="min-w-8 text-center text-lg font-black text-cocoa">{quantity}</span>
+                <span className="min-w-8 text-center text-lg font-semibold text-foreground">{quantity}</span>
                 <button className="quantity-button" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity"><Plus size={18} /></button>
               </div>
               <button className="primary-button justify-center" onClick={() => onAdd(product, quantity)}>Add to Cart</button>
@@ -1057,7 +1038,7 @@ function GlowQuiz({ onBook, onAddProducts }: { onBook: (service?: Service) => vo
   const estimated = recommendedProducts.reduce((sum, product) => sum + product.price, 0) + (service?.numericPrice ?? 0);
 
   return (
-    <section id="quiz" className="section-pad bg-gradient-to-br from-buttercream via-vanilla to-mint/40 px-4">
+    <section id="quiz" className="section-pad bg-muted px-4">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <p className="section-kicker">Find My Glow</p>
@@ -1067,11 +1048,11 @@ function GlowQuiz({ onBook, onAddProducts }: { onBook: (service?: Service) => vo
           </p>
         </div>
 
-        <div className="rounded-[34px] border border-caramel/10 bg-white/80 p-5 shadow-gloss sm:p-7">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-soft sm:p-7">
           {!complete ? (
             <>
-              <div className="mb-5 h-3 overflow-hidden rounded-full bg-buttercream">
-                <div className="h-full rounded-full bg-gradient-to-r from-peach via-blush to-lavender transition-all" style={{ width: `${((Object.keys(answers).length + 1) / quizQuestions.length) * 100}%` }} />
+              <div className="mb-5 h-2 overflow-hidden rounded-full bg-muted">
+                <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${((Object.keys(answers).length + 1) / quizQuestions.length) * 100}%` }} />
               </div>
               <p className="section-kicker">Question {step + 1} of {quizQuestions.length}</p>
               <h3 className="mt-2 font-display text-3xl font-semibold text-cocoa">{current.label}</h3>
@@ -1082,7 +1063,7 @@ function GlowQuiz({ onBook, onAddProducts }: { onBook: (service?: Service) => vo
                   </button>
                 ))}
               </div>
-              {step > 0 && <button className="mt-5 text-sm font-black text-caramel underline decoration-peach decoration-4 underline-offset-4" onClick={() => setStep((currentStep) => Math.max(0, currentStep - 1))}>Back one question</button>}
+              {step > 0 && <button className="mt-5 text-sm font-semibold text-accent underline decoration-accent decoration-1 underline-offset-4" onClick={() => setStep((currentStep) => Math.max(0, currentStep - 1))}>Back one question</button>}
             </>
           ) : result && (
             <div>
@@ -1106,9 +1087,9 @@ function GlowQuiz({ onBook, onAddProducts }: { onBook: (service?: Service) => vo
                 ))}
               </div>
               <div className="mt-5 rounded-[24px] bg-vanilla p-5">
-                <h4 className="font-black text-cocoa">Prep timeline</h4>
+                <h4 className="font-semibold text-foreground">Prep timeline</h4>
                 <p className="mt-2 text-sm font-medium leading-6 text-charcoal/70">{result.prep}</p>
-                <p className="mt-3 text-lg font-black text-cocoa">Estimated cost: {formatPrice(estimated)}</p>
+                <p className="mt-3 text-lg font-semibold text-foreground">Estimated cost: {formatPrice(estimated)}</p>
               </div>
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <button className="primary-button justify-center" onClick={() => service ? onBook(service) : scrollToId('shop')}>Book recommended glow</button>
@@ -1224,12 +1205,12 @@ function ReviewsSection() {
   const prev = () => setIndex((current) => (current - 1 + reviews.length) % reviews.length);
 
   return (
-    <section id="reviews" className="section-pad bg-gradient-to-br from-buttercream via-vanilla to-peach/20 px-4">
+    <section id="reviews" className="section-pad bg-muted px-4">
       <div className="mx-auto max-w-5xl text-center">
         <p className="section-kicker">Reviews</p>
         <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Five-star glow notes.</h2>
         <div className="review-card mt-8">
-          <div className="mx-auto flex w-fit items-center gap-2 rounded-full bg-white/75 px-4 py-2 text-sm font-black text-cocoa"><BadgeCheck size={17} /> Verified glow</div>
+          <div className="mx-auto flex w-fit items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground"><BadgeCheck size={17} /> Verified glow</div>
           <div className="mt-5 flex justify-center"><Rating value={5} /></div>
           <p className="mt-6 text-2xl font-medium leading-9 text-charcoal/80">"{review.text}"</p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -1325,7 +1306,7 @@ function GiftCertificates({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>,
               name: option.name,
               price,
               meta: `To ${recipient || 'recipient'} from ${sender || 'sender'}`,
-              accent: '#FF8FBC',
+              accent: '#B8860B',
             });
           }}
         >
@@ -1376,23 +1357,23 @@ function FAQSection() {
 function NewsletterSection() {
   const [success, setSuccess] = useState(false);
   return (
-    <section className="bg-cocoa px-4 py-16 text-vanilla">
+    <section className="border-y border-border bg-foreground px-4 py-20 text-background">
       <div className="mx-auto grid max-w-6xl items-center gap-6 md:grid-cols-[0.9fr_1.1fr]">
         <div>
-          <h2 className="font-display text-4xl font-semibold leading-none sm:text-5xl">Join the glow club.</h2>
-          <p className="mt-4 text-base font-medium leading-7 text-vanilla/80">Get appointment reminders, glow tips, product drops, bridal timelines, and prep checklists.</p>
+          <h2 className="font-display text-4xl font-normal leading-tight sm:text-5xl">Join the glow club.</h2>
+          <p className="mt-4 text-base font-normal leading-7 text-background/78">Get appointment reminders, glow tips, product drops, bridal timelines, and prep checklists.</p>
         </div>
         <form
-          className="flex flex-col gap-3 rounded-[28px] bg-white/12 p-3 sm:flex-row"
+          className="flex flex-col gap-3 rounded-lg border border-white/15 bg-white/10 p-3 sm:flex-row"
           onSubmit={(event) => {
             event.preventDefault();
             setSuccess(true);
           }}
         >
-          <input className="min-h-14 flex-1 rounded-full border border-white/20 bg-white/90 px-5 font-bold text-cocoa outline-none" type="email" placeholder="Email address" required />
-          <button className="rounded-full bg-peach px-6 py-3 font-black text-cocoa transition hover:-translate-y-0.5 hover:bg-blush">Get glowing</button>
+          <input className="min-h-11 flex-1 rounded-md border border-white/20 bg-white/95 px-5 font-normal text-foreground outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-foreground" type="email" placeholder="Email address" required />
+          <button className="rounded-md bg-accent px-6 py-3 font-semibold text-accent-foreground transition hover:bg-accent-secondary hover:text-foreground">Get glowing</button>
         </form>
-        {success && <p className="md:col-start-2 rounded-full bg-white/12 px-5 py-3 text-sm font-black text-vanilla">You're in. Your glow routine just got an upgrade.</p>}
+        {success && <p className="md:col-start-2 rounded-md border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-background">You're in. Your glow routine just got an upgrade.</p>}
       </div>
     </section>
   );
@@ -1415,12 +1396,12 @@ function Footer() {
             <div className="flex items-center gap-3">
               <span className="brand-mark">SS</span>
               <div>
-                <p className="font-display text-3xl font-semibold leading-none text-cocoa">Sorbet Skin</p>
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-caramel">Whipped glow, zero sun damage.</p>
+                <p className="font-display text-3xl font-normal leading-none text-foreground">Sorbet Skin</p>
+                <p className="text-xs font-semibold uppercase text-accent">Whipped glow, zero sun damage.</p>
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
-              {['Vegan', 'Cruelty-free', 'No fake tan smell'].map((badge) => <span key={badge} className="badge-pill bg-white/80 text-cocoa">{badge}</span>)}
+              {['Vegan', 'Cruelty-free', 'No fake tan smell'].map((badge) => <span key={badge} className="badge-pill" >{badge}</span>)}
             </div>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
@@ -1432,7 +1413,7 @@ function Footer() {
             ))}
           </div>
         </div>
-        <div className="mt-10 rounded-[28px] bg-white/70 p-5 text-xs font-bold leading-6 text-charcoal/70">
+        <div className="mt-10 rounded-lg border border-border bg-card p-5 text-xs font-normal leading-6 text-muted-foreground">
           <p>Sorbet Skin self-tan products do not contain SPF and do not protect against UV exposure. Wear SPF daily. External use only. Patch test before use. Claims such as vegan, cruelty-free, transfer-resistant, naturally derived, and no fake tan smell should be verified through formulation testing and certification before commercial launch.</p>
           <p className="mt-3">External use only. Patch test before use. Avoid eyes and broken skin. Stop use if irritation occurs.</p>
           <p className="mt-3">Copyright 2026 Sorbet Skin. Original mock brand and website concept.</p>
@@ -1474,7 +1455,7 @@ function BookingModal({ service, open, onClose }: { service?: Service; open: boo
         </div>
 
         {success ? (
-          <div className="mt-8 rounded-[28px] bg-mint/45 p-6">
+          <div className="mt-8 rounded-lg border border-accent/25 bg-accent/10 p-6">
             <h3 className="font-display text-3xl font-semibold text-cocoa">Your glow request has been received.</h3>
             <p className="mt-3 text-sm font-bold leading-7 text-charcoal/75">We will confirm your appointment shortly.</p>
           </div>
@@ -1536,7 +1517,7 @@ function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, on
             <div className="grid gap-3">
               {items.map((item) => (
                 <div key={item.key} className="cart-line">
-                  <div className="cart-line-icon" style={{ backgroundColor: item.accent ?? '#FFF3DD' }}><PackageCheck size={18} /></div>
+                  <div className="cart-line-icon" style={{ backgroundColor: item.accent ?? '#F5F3F0' }}><PackageCheck size={18} /></div>
                   <div className="min-w-0 flex-1">
                     <h3>{item.name}</h3>
                     {item.meta && <p>{item.meta}</p>}
@@ -1544,7 +1525,7 @@ function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, on
                   </div>
                   <div className="flex items-center gap-2">
                     <button className="quantity-button" onClick={() => onUpdate(item.key, Math.max(1, item.quantity - 1))} aria-label={`Decrease ${item.name}`}><Minus size={15} /></button>
-                    <span className="w-5 text-center text-sm font-black text-cocoa">{item.quantity}</span>
+                    <span className="w-5 text-center text-sm font-semibold text-foreground">{item.quantity}</span>
                     <button className="quantity-button" onClick={() => onUpdate(item.key, item.quantity + 1)} aria-label={`Increase ${item.name}`}><Plus size={15} /></button>
                   </div>
                   <button className="icon-button h-9 w-9 bg-white" onClick={() => onRemove(item.key)} aria-label={`Remove ${item.name}`}><Trash2 size={16} /></button>
@@ -1554,12 +1535,12 @@ function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, on
           )}
 
           <div className="mt-6 rounded-[24px] bg-white/75 p-4">
-            <div className="flex justify-between text-sm font-black text-cocoa"><span>Free shipping progress</span><span>{subtotal >= 80 ? 'Unlocked' : `${formatPrice(80 - subtotal)} to go`}</span></div>
-            <div className="mt-3 h-3 overflow-hidden rounded-full bg-buttercream"><div className="h-full rounded-full bg-gradient-to-r from-peach via-blush to-lavender" style={{ width: `${progress}%` }} /></div>
+            <div className="flex justify-between text-sm font-semibold text-foreground"><span>Free shipping progress</span><span>{subtotal >= 80 ? 'Unlocked' : `${formatPrice(80 - subtotal)} to go`}</span></div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} /></div>
           </div>
 
           <div className="mt-6">
-            <h3 className="text-sm font-black uppercase tracking-[0.08em] text-cocoa">Suggested upsells</h3>
+            <h3 className="font-mono text-sm font-medium uppercase text-foreground">Suggested upsells</h3>
             <div className="mt-3 grid gap-3">
               {upsells.map((product) => (
                 <button key={product.id} className="upsell-row" onClick={() => onAddProduct(product)}>
@@ -1572,7 +1553,7 @@ function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, on
           </div>
         </div>
         <div className="border-t border-caramel/10 p-5">
-          <div className="flex items-center justify-between text-lg font-black text-cocoa"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+          <div className="flex items-center justify-between text-lg font-semibold text-foreground"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
           <button className="primary-button mt-4 w-full justify-center" onClick={onCheckout}>Mock checkout</button>
         </div>
       </aside>

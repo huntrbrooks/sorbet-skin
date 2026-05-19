@@ -10,6 +10,7 @@ export type Product = {
   developmentTime: string;
   colorTheme: string;
   themeHex: string;
+  asset: string;
   claims: string[];
   heroIngredients: string[];
   copy: string;

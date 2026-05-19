@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1400" role="img" aria-label="Velvet Mitt Sorbet Skin application mitt packaging">
+    <defs>
+    <linearGradient id="velvet-mitt-body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EEE9FF"/>
+      <stop offset="0.36" stop-color="#B8A7FF"/>
+      <stop offset="1" stop-color="#8E78E8"/>
+    </linearGradient>
+    <linearGradient id="velvet-mitt-cap" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="0.52" stop-color="#FFF3DD"/>
+      <stop offset="1" stop-color="#B8A7FF" stop-opacity="0.78"/>
+    </linearGradient>
+    <linearGradient id="velvet-mitt-label" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFA" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FFF3DD" stop-opacity="0.72"/>
+    </linearGradient>
+    <radialGradient id="velvet-mitt-glow" cx="50%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="velvet-mitt-shadow" x="-40%" y="-40%" width="180%" height="190%">
+      <feDropShadow dx="0" dy="36" stdDeviation="26" flood-color="#6B412A" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+    <ellipse cx="512" cy="1192" rx="270" ry="60" fill="#6B412A" opacity="0.16"/>
+    <g filter="url(#velvet-mitt-shadow)">
+      <rect x="280" y="420" width="464" height="650" rx="88" fill="url(#velvet-mitt-body)" stroke="#fff" stroke-width="7"/>
+      <path d="M292 625c87 46 132 51 220 0s143-48 220 3v442H292Z" fill="#FFF3DD" opacity="0.42"/>
+      <path d="M350 268c78-72 230-72 318 0 66 54 90 159 80 254l-34 335c-7 70-69 124-141 124H449c-72 0-133-54-140-124l-33-335c-10-96 13-201 74-254Z" fill="#E9DFFF" stroke="#fff" stroke-width="8"/>
+      <path d="M399 315c55-45 166-45 226 0 47 36 62 113 55 184l-28 302c-5 48-47 86-96 86h-89c-49 0-91-38-96-86l-28-302c-7-72 10-148 56-184Z" fill="url(#velvet-mitt-cap)" opacity="0.98"/>
+      <path d="M360 972h304c42 0 76 34 76 76v96H284v-96c0-42 34-76 76-76Z" fill="#FFF9EE" stroke="#fff" stroke-width="6"/>
+      <text x="512" y="1042" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900" letter-spacing="4" fill="#302621">SORBET SKIN</text>
+      <text x="512" y="1108" text-anchor="middle" font-family="Georgia, serif" font-size="54" font-weight="700" fill="#302621">Velvet Mitt</text>
+      <text x="512" y="1152" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" fill="#302621" opacity="0.62">Reusable application mitt</text>
+      <g transform="translate(478 1186) scale(0.62)" fill="#FF8FBC" opacity="0.85">
+    <path d="M35 5c-13 7-20 18-18 30 2 10 13 14 25 18 11 3 18 7 18 15 0 8-7 15-22 20 24-2 39-13 39-29 0-13-11-20-28-25-12-3-18-7-17-14 1-6 7-11 16-15-4-1-8-1-13 0z"/>
+    <path d="M27 52c-12 4-20 12-20 23 0 13 12 23 34 25-11-5-17-11-17-18 0-9 9-15 24-20-7-5-14-8-21-10z" opacity="0.6"/>
+  </g>
+    </g>
+  </svg>
