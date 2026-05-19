@@ -1,13 +1,23 @@
 import {
-  ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  CalendarDays,
+  Check,
   ChevronDown,
-  Droplets,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Gift,
   Heart,
+  Home,
+  Instagram,
   Leaf,
+  Mail,
+  MapPin,
   Menu,
   Minus,
+  PackageCheck,
+  Phone,
   Plus,
   Search,
   ShieldCheck,
@@ -18,193 +28,95 @@ import {
   Star,
   Sun,
   Trash2,
+  Truck,
   WandSparkles,
   X,
 } from 'lucide-react';
+import type { CSSProperties, FormEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { productMap, products } from './data/products';
-import type { CartItem, Product, QuizAnswerMap } from './types';
+import {
+  announcementMessages,
+  bridalPackages,
+  bridalTimeline,
+  faqs,
+  giftOptions,
+  navLinks,
+  packages,
+  prepChecklist,
+  productMap,
+  products,
+  reviews,
+  safetyNotes,
+  serviceAddons,
+  services,
+  spfDisclaimer,
+  quizQuestions,
+} from './data/site';
+import type { CartItem, Product, QuizAnswerMap, Service } from './types';
 
-const cartStorageKey = 'sorbet-skin-cart-v1';
+const cartStorageKey = 'sorbet-skin-cart-v2';
 
-const navLinks = [
-  ['Shop', 'shop'],
-  ['Glow Quiz', 'quiz'],
-  ['Bundle Builder', 'bundles'],
-  ['Routine', 'routine'],
-  ['Pro Spray', 'pro'],
-  ['Ingredients', 'ingredients'],
-  ['Reviews', 'reviews'],
-  ['FAQ', 'faq'],
-];
-
-const rotatingMessages = [
-  'Transfer-resistant once developed, rinsed, and dry.',
-  'Self-tan is not SPF. Wear sunscreen daily.',
-  'Foaming body tan, gradual glow, and tan-extending bodycare.',
-];
-
-const shadeFilters = ['Light to Medium', 'Medium to Dark', 'Dark', 'Buildable', 'Customisable', 'Instant Bronze', 'Prep', 'Tool', 'Glow Enhancer'];
-const typeFilters = ['Foaming Body Tan', 'Gradual Tanning Moisturiser', 'Face Drops', 'Instant Body Blur', 'Tan Extender', 'Prep Product', 'Tool', 'Pro Spray'];
-const claimFilters = ['Vegan', 'Cruelty-free', 'No fake tan smell', 'Streak-free', 'Transfer-resistant', 'Foaming formula', 'Gradual glow', 'Fragrance-free', 'Professional'];
-const developmentFilters = ['Instant', '1 to 3 hours', '2 to 6 hours', '5 minutes', '6 to 8 hours', 'Overnight', 'Daily build'];
-const scentFilters = ['Peach Sorbet', 'Salted Caramel', 'Cocoa Vanilla', 'Vanilla Cream', 'Fragrance-free', 'Toasted Coconut', 'Coconut Milk', 'Honey Coconut', 'Low-odour Coconut', 'None'];
-
-const ingredientInfo: Record<string, string> = {
-  DHA: "The sunless tanning active that reacts with the skin's surface to create a bronzed look.",
-  'Aloe Vera': 'Helps skin feel soft, calm, and hydrated.',
-  'Hyaluronic Acid': 'Helps skin feel plump and hydrated.',
-  'Kakadu Plum': 'A vitamin C-rich botanical hero ingredient.',
-  'Green Tea': 'A botanical antioxidant used in skin-loving formulas.',
-  'Coconut Water': 'A refreshing hydration hero for soft-feeling skin.',
-  'Vitamin E': 'Helps condition skin and support a smooth bodycare feel.',
-  'Jojoba Oil': 'A lightweight oil that helps skin feel soft and conditioned.',
-  Squalane: 'A silky emollient that gives body oil a smooth, non-heavy finish.',
-  'Shea Butter': 'A rich moisturising butter used in bodycare for softness.',
-  'Fruit Enzymes': 'Used in prep formulas to help refresh the feel of skin.',
-};
-
-const reviews = [
-  {
-    name: 'Mia',
-    skinTone: 'Fair',
-    product: 'Peach Glaze',
-    text: 'Finally, a tan that does not smell like old biscuits. Peach Glaze gave me a soft golden colour and blended so easily.',
-  },
-  {
-    name: 'Tahlia',
-    skinTone: 'Olive',
-    product: 'Caramel Cloud',
-    text: 'Warm bronze without going orange. The Velvet Mitt made it basically foolproof.',
-  },
-  {
-    name: 'Jade',
-    skinTone: 'Medium',
-    product: 'Honey Dew Oil',
-    text: 'This made my tan fade way more evenly. Glossy but not greasy.',
-  },
-  {
-    name: 'Sienna',
-    skinTone: 'Light',
-    product: 'Vanilla Veil',
-    text: 'I use it like moisturiser and wake up looking healthier. Perfect daily glow product.',
-  },
-  {
-    name: 'Chloe',
-    skinTone: 'Deep',
-    product: 'Champagne Blur',
-    text: 'Instant glow for events. My legs looked smooth under lights and it dried down nicely.',
-  },
-  {
-    name: 'Ava',
-    skinTone: 'Medium',
-    product: 'Cocoa Drip',
-    text: 'Deep colour fast, but still natural. No harsh fake tan smell, which sold me.',
-  },
-];
-
-const quizQuestions = [
-  { id: 'tone', label: 'What is your natural skin tone?', options: ['Fair', 'Light', 'Medium', 'Olive', 'Deep'] },
-  { id: 'result', label: 'What result do you want?', options: ['Subtle glow', 'Golden bronze', 'Deep bronze', 'Instant event glow', 'Daily maintenance', 'Professional spray result'] },
-  { id: 'timing', label: 'When do you need the tan?', options: ['Tonight', 'Tomorrow', 'This week', 'Daily maintenance', 'Salon service'] },
-  { id: 'skin', label: 'What is your skin vibe?', options: ['Dry', 'Sensitive', 'Normal', 'Oily'] },
-  { id: 'scent', label: 'What scent do you prefer?', options: ['Fruity', 'Gourmand', 'Coconut', 'Fragrance-free', 'Low-odour professional'] },
-  { id: 'priority', label: 'What matters most?', options: ['Vegan', 'Cruelty-free', 'No fake tan smell', 'Streak-free', 'Transfer-resistant', 'Natural-origin ingredients'] },
-];
-
-const presetBundles = [
-  { name: 'Starter Glow', ids: ['peach-glaze', 'velvet-mitt', 'honey-dew-oil'] },
-  { name: 'Deep Bronze', ids: ['cocoa-drip', 'velvet-mitt', 'honey-dew-oil'] },
-  { name: 'Daily Glow', ids: ['vanilla-veil', 'honey-dew-drops', 'honey-dew-oil'] },
-  { name: 'Event Glow', ids: ['champagne-blur', 'honey-dew-drops', 'honey-dew-oil'] },
-  { name: 'Clean Girl Prep', ids: ['coconut-melt', 'peach-glaze', 'velvet-mitt'] },
-  { name: 'Salon Pro', ids: ['sorbet-pro-concentrate', 'coconut-melt', 'honey-dew-oil'] },
-];
-
-const routineSteps = [
-  {
-    title: 'Prep',
-    productIds: ['coconut-melt'],
-    copy: 'Melt away old tan so your next glow applies evenly.',
-    time: '5 minutes',
-    tip: 'Focus on elbows, knees, ankles, and any patchy areas before your fresh glow.',
-  },
-  {
-    title: 'Apply',
-    productIds: ['peach-glaze', 'caramel-cloud', 'cocoa-drip'],
-    copy: 'Use long sweeping motions with Velvet Mitt for a streak-free foaming body tan.',
-    time: '10 minutes',
-    tip: 'Start at the ankles and work upward so you can blend before the foam settles.',
-  },
-  {
-    title: 'Face',
-    productIds: ['honey-dew-drops'],
-    copy: 'Mix with moisturiser for a custom face glow.',
-    time: '1 minute',
-    tip: 'Blend lightly around the hairline and wash hands after application.',
-  },
-  {
-    title: 'Maintain',
-    productIds: ['vanilla-veil'],
-    copy: 'Use the gradual tanning moisturiser to build soft colour between full tan days.',
-    time: 'Daily',
-    tip: 'Apply to dry skin in thin layers for a softly buildable finish.',
-  },
-  {
-    title: 'Extend',
-    productIds: ['honey-dew-oil'],
-    copy: 'Pair with your tan to keep skin hydrated and help your glow fade evenly.',
-    time: 'Instant hydration',
-    tip: 'Press onto shins, shoulders, and collarbones for a glossy hydrated finish.',
-  },
-];
-
-const faqs = [
-  ['Is Sorbet Skin cruelty-free?', 'Yes, Sorbet Skin is positioned as cruelty-free and never tested on animals. Official certification should be obtained before launch.'],
-  ['Is Sorbet Skin vegan?', 'Yes, the range is designed to be vegan with no animal-derived ingredients.'],
-  ['Does it smell like fake tan?', 'Sorbet Skin is positioned around no fake tan smell, using playful dessert-inspired scents and low-odour tanning technology.'],
-  ['Is it transferproof?', 'Sorbet Skin is transfer-resistant once fully developed, rinsed, and dry. Avoid promising zero transfer in every situation.'],
-  ['Is it streak-free?', 'The foaming body tan range is designed for smooth, streak-free blending, especially when used with the Velvet Mitt.'],
-  ['Is it all natural?', 'Sorbet Skin products feature naturally derived hero ingredients. Final all natural claims require verified formulation review.'],
-  ['Does self-tan protect me from the sun?', 'No. Self-tan does not contain SPF and does not protect against UV exposure. Wear SPF daily.'],
-  ['How long does the tan last?', 'Usually 5 to 7 days depending on prep, skin type, application, and moisturising.'],
-  ['How do I make my tan last longer?', 'Use Honey Dew Oil, moisturise daily, avoid harsh exfoliation, and pat skin dry after showering.'],
-  ['What is Vanilla Veil for?', 'Vanilla Veil is a gradual tanning moisturiser designed for daily buildable glow and tan maintenance.'],
-  ['What is Honey Dew Oil for?', 'Honey Dew Oil is designed to hydrate the skin and help extend the look of your tan.'],
-  ['Can salons use Sorbet Pro Concentrate?', 'Yes. It is designed as a professional spray booth concentrate for trained spray tan operators and salon systems.'],
-  ['Can I use Honey Dew Drops on my face?', 'Yes. Mix the drops with moisturiser, apply evenly, and wash hands after application.'],
-  ['How do I remove old tan?', 'Use Coconut Melt, gently exfoliate, and moisturise before reapplying.'],
-];
+const shadeFilters = [...new Set(products.map((product) => product.shade))];
+const typeFilters = [...new Set(products.map((product) => product.category))];
+const developmentFilters = [...new Set(products.map((product) => product.developmentTime))];
+const scentFilters = [...new Set(products.map((product) => product.scent))];
+const claimFilters = ['Vegan', 'Cruelty-free', 'No fake tan smell', 'Streak-free', 'Transfer-resistant', 'Foaming formula', 'Buildable', 'Hydrating'];
 
 type FilterState = {
   shade: string[];
   category: string[];
-  claims: string[];
   developmentTime: string[];
   scent: string[];
+  claims: string[];
   sort: 'featured' | 'low' | 'high';
 };
 
 const initialFilters: FilterState = {
   shade: [],
   category: [],
-  claims: [],
   developmentTime: [],
   scent: [],
+  claims: [],
   sort: 'featured',
 };
 
-function formatPrice(amount: number) {
-  const hasCents = Math.round(amount * 100) % 100 !== 0;
-  return `$${amount.toFixed(hasCents ? 2 : 0)} AUD`;
-}
-
-function slug(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
+const toneExamples = [
+  { name: 'Fair', before: '#f3c8b7', after: '#d99a54' },
+  { name: 'Medium', before: '#d7a28c', after: '#b66f36' },
+  { name: 'Deep', before: '#9b6a52', after: '#6b412a' },
+];
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
+}
+
+function formatPrice(amount: number) {
+  return `$${amount.toFixed(amount % 1 ? 2 : 0)} AUD`;
+}
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function matchesClaim(product: Product, claim: string) {
+  const lower = product.claims.map((item) => item.toLowerCase());
+  if (claim === 'Transfer-resistant') {
+    return lower.some((item) => item.includes('transfer-resistant'));
+  }
+  if (claim === 'Foaming formula') {
+    return product.category === 'Foaming Body Tan' || lower.some((item) => item.includes('foaming'));
+  }
+  return lower.some((item) => item.includes(claim.toLowerCase()));
 }
 
 function productById(id: string) {
@@ -215,96 +127,24 @@ function productById(id: string) {
   return product;
 }
 
-function matchesClaim(product: Product, claim: string) {
-  const lowerClaims = product.claims.map((item) => item.toLowerCase());
-  const wanted = claim.toLowerCase();
-
-  if (claim === 'Transfer-resistant') {
-    return lowerClaims.some((item) => item.includes('transfer-resistant'));
-  }
-
-  if (claim === 'Foaming formula') {
-    return product.category === 'Foaming Body Tan' || lowerClaims.some((item) => item.includes('foaming'));
-  }
-
-  if (claim === 'Gradual glow') {
-    return product.category === 'Gradual Tanning Moisturiser' || lowerClaims.some((item) => item.includes('gradual'));
-  }
-
-  if (claim === 'Professional') {
-    return product.category === 'Pro Spray' || lowerClaims.some((item) => item.includes('professional'));
-  }
-
-  return lowerClaims.some((item) => item.includes(wanted));
-}
-
-function getRecommendations(answers: QuizAnswerMap) {
-  const tone = answers.tone;
-  const result = answers.result;
-  const timing = answers.timing;
-  const skin = answers.skin;
-
-  if (result === 'Professional spray result' || timing === 'Salon service') {
-    return ['sorbet-pro-concentrate', 'coconut-melt', 'honey-dew-oil'];
-  }
-
-  if (timing === 'Tonight' || result === 'Instant event glow') {
-    return ['champagne-blur', 'honey-dew-oil', 'velvet-mitt'];
-  }
-
-  if (result === 'Deep bronze' || tone === 'Deep') {
-    return ['cocoa-drip', 'honey-dew-oil', 'velvet-mitt'];
-  }
-
-  if (skin === 'Dry' || result === 'Daily maintenance' || timing === 'Daily maintenance') {
-    return ['vanilla-veil', 'honey-dew-oil', 'honey-dew-drops'];
-  }
-
-  if ((tone === 'Fair' || tone === 'Light') && result === 'Subtle glow') {
-    return ['peach-glaze', 'vanilla-veil', 'velvet-mitt'];
-  }
-
-  if ((tone === 'Medium' || tone === 'Olive') && result === 'Golden bronze') {
-    return ['caramel-cloud', 'honey-dew-oil', 'velvet-mitt'];
-  }
-
-  return ['peach-glaze', 'honey-dew-drops', 'honey-dew-oil'];
-}
-
-function useAnnouncementRotation() {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % rotatingMessages.length);
-    }, 3600);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  return rotatingMessages[index];
-}
-
-function ProductRender({ product, size = 'md', float = false }: { product: Product; size?: 'sm' | 'md' | 'lg' | 'hero'; float?: boolean }) {
+function ProductRender({ product, size = 'md', float = false }: { product: Product; size?: 'xs' | 'sm' | 'md' | 'lg' | 'hero'; float?: boolean }) {
   const variant =
     product.category === 'Tool'
       ? 'mitt'
       : product.category === 'Face Drops'
         ? 'drops'
-        : product.category === 'Tan Extender'
-          ? 'oil'
-          : product.category === 'Pro Spray'
-            ? 'pro'
-            : product.category === 'Prep Product'
-              ? 'prep'
-              : product.category === 'Instant Body Blur'
-                ? 'blur'
-                : 'mousse';
+        : product.category === 'Prep Product'
+          ? 'prep'
+          : product.category === 'Instant Body Blur'
+            ? 'blur'
+            : product.category === 'Gradual Tanning Moisturiser'
+              ? 'cream'
+              : 'mousse';
 
   return (
     <div
       className={cx('product-render', `product-render-${variant}`, `product-render-${size}`, float && 'animate-floaty')}
-      style={{ '--accent': product.themeHex } as React.CSSProperties}
+      style={{ '--accent': product.themeHex } as CSSProperties}
       role="img"
       aria-label={`${product.name} ${product.type} packaging mockup`}
     >
@@ -318,9 +158,9 @@ function ProductRender({ product, size = 'md', float = false }: { product: Produ
           <div className="product-cap" />
           <div className="product-body">
             <div className="product-highlight" />
-            <div className="product-brand">SORBET SKIN</div>
-            <div className="product-name">{product.name}</div>
-            <div className="product-type">{product.type}</div>
+            <span className="product-brand">SORBET SKIN</span>
+            <span className="product-name">{product.name}</span>
+            <span className="product-type">{product.type}</span>
           </div>
         </>
       )}
@@ -328,184 +168,217 @@ function ProductRender({ product, size = 'md', float = false }: { product: Produ
   );
 }
 
-function Rating({ value }: { value: number }) {
+function Rating({ value = 5 }: { value?: number }) {
   return (
     <div className="flex items-center gap-1 text-cocoa" aria-label={`${value} out of 5 stars`}>
       {Array.from({ length: 5 }).map((_, index) => (
         <Star key={index} size={15} className={index < Math.round(value) ? 'fill-honey text-honey' : 'text-caramel/30'} />
       ))}
-      <span className="ml-1 text-sm font-bold">{value.toFixed(1)}</span>
+      <span className="ml-1 text-xs font-black">{value.toFixed(1)}</span>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="grid gap-2 text-sm font-black text-cocoa">
+      {label}
+      {children}
+    </label>
+  );
+}
+
+function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  return <input {...props} className={cx('field-input', props.className)} />;
+}
+
+function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea {...props} className={cx('field-input min-h-28 resize-y', props.className)} />;
+}
+
+function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return <select {...props} className={cx('field-input', props.className)} />;
+}
+
+function SectionHeading({ eyebrow, title, copy, align = 'center' }: { eyebrow?: string; title: string; copy?: string; align?: 'center' | 'left' }) {
+  return (
+    <div className={cx('section-heading', align === 'left' && 'section-heading-left')}>
+      {eyebrow && <p className="section-kicker">{eyebrow}</p>}
+      <h2>{title}</h2>
+      {copy && <p>{copy}</p>}
     </div>
   );
 }
 
 function AnnouncementBar() {
-  const message = useAnnouncementRotation();
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setIndex((current) => (current + 1) % announcementMessages.length), 3200);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
-    <div className="relative z-50 bg-cocoa px-4 py-2 text-center text-xs font-extrabold uppercase text-vanilla sm:text-sm">
-      <span>Vegan. Cruelty-free. No fake tan smell. Free shipping over $80 AUD.</span>
-      <span className="mx-3 hidden text-peach sm:inline">/</span>
-      <span className="block normal-case text-buttercream sm:inline">{message}</span>
+    <div className="bg-cocoa px-4 py-2 text-center text-xs font-black uppercase tracking-[0.08em] text-vanilla sm:text-sm">
+      {announcementMessages[index]}
     </div>
   );
 }
 
-function Header({
-  cartCount,
-  onCartOpen,
-}: {
-  cartCount: number;
-  onCartOpen: () => void;
-}) {
+function Header({ cartCount, onCartOpen, onBook }: { cartCount: number; onCartOpen: () => void; onBook: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
-  const linkMarkup = (
-    <>
-      {navLinks.map(([label, id]) => (
-        <a
-          key={id}
-          href={`#${id}`}
-          className="rounded-full px-3 py-2 text-sm font-extrabold text-cocoa transition hover:bg-peach/30 hover:text-cocoa focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush"
-          onClick={() => setMobileOpen(false)}
-        >
-          {label}
-        </a>
-      ))}
-    </>
-  );
+  const handleNav = (id: string) => {
+    setMobileOpen(false);
+    if (id === 'book') {
+      onBook();
+      return;
+    }
+    scrollToId(id);
+  };
 
   return (
-    <header className="relative z-40 border-b border-caramel/10 bg-vanilla/90 px-4 py-3 shadow-[0_8px_30px_rgba(107,65,42,0.08)] backdrop-blur-xl">
+    <header className="border-b border-caramel/10 bg-vanilla/90 px-4 py-3 shadow-[0_10px_30px_rgba(107,65,42,0.08)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        <a href="#top" className="group flex items-center gap-3" aria-label="Sorbet Skin home">
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-peach via-blush to-lavender text-lg font-black text-cocoa shadow-button transition group-hover:rotate-6">
-            SS
-          </span>
+        <button className="group flex items-center gap-3 text-left" onClick={() => scrollToId('top')} aria-label="Sorbet Skin home">
+          <span className="brand-mark">SS</span>
           <span>
-            <span className="block font-display text-2xl font-black leading-none text-cocoa">Sorbet Skin</span>
-            <span className="block text-xs font-bold uppercase text-caramel">Whipped glow, zero sun damage.</span>
+            <span className="block font-display text-2xl font-semibold leading-none text-cocoa">Sorbet Skin</span>
+            <span className="block text-[11px] font-black uppercase tracking-[0.12em] text-caramel">Whipped glow, zero sun damage.</span>
           </span>
-        </a>
+        </button>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-          {linkMarkup}
+        <nav className="hidden items-center gap-1 xl:flex" aria-label="Main navigation">
+          {navLinks.map(([label, id]) => (
+            <button key={id} className="nav-link" onClick={() => handleNav(id)}>
+              {label}
+            </button>
+          ))}
         </nav>
 
         <div className="flex items-center gap-2">
-          <button className="icon-button" aria-label="Search Sorbet Skin">
+          <button className="icon-button" aria-label="Search Sorbet Skin" onClick={() => setSearchOpen((open) => !open)}>
             <Search size={20} />
           </button>
           <button className="icon-button relative" aria-label={`Open cart with ${cartCount} items`} onClick={onCartOpen}>
             <ShoppingBag size={20} />
-            {cartCount > 0 && (
-              <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-blush px-1 text-[11px] font-black text-white">
-                {cartCount}
-              </span>
-            )}
+            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
           </button>
-          <button className="icon-button lg:hidden" aria-label="Open menu" onClick={() => setMobileOpen((open) => !open)}>
+          <button className="primary-button hidden min-h-11 px-5 py-2 text-sm lg:inline-flex" onClick={onBook}>
+            Book Now
+          </button>
+          <button className="icon-button xl:hidden" aria-label="Open menu" onClick={() => setMobileOpen((open) => !open)}>
             {mobileOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
         </div>
       </div>
 
+      {searchOpen && (
+        <div className="mx-auto mt-3 max-w-7xl rounded-[24px] border border-caramel/10 bg-white/90 p-3 shadow-soft">
+          <label className="flex items-center gap-3 rounded-full bg-vanilla px-4 py-3 text-sm font-bold text-charcoal/70">
+            <Search size={18} className="text-cocoa" />
+            <input className="w-full bg-transparent outline-none" placeholder="Search services, products, prep guides..." />
+          </label>
+        </div>
+      )}
+
       {mobileOpen && (
-        <nav className="mx-auto mt-4 grid max-w-7xl grid-cols-2 gap-2 rounded-[28px] border border-caramel/10 bg-white/75 p-3 shadow-soft lg:hidden" aria-label="Mobile navigation">
-          {linkMarkup}
+        <nav className="mx-auto mt-4 grid max-w-7xl gap-2 rounded-[28px] border border-caramel/10 bg-white/90 p-3 shadow-soft sm:grid-cols-2 xl:hidden" aria-label="Mobile navigation">
+          {navLinks.map(([label, id]) => (
+            <button key={id} className="nav-link justify-start" onClick={() => handleNav(id)}>
+              {label}
+            </button>
+          ))}
         </nav>
       )}
     </header>
   );
 }
 
-function Hero({ onQuickStart }: { onQuickStart: () => void }) {
-  const heroProducts = ['peach-glaze', 'caramel-cloud', 'honey-dew-drops', 'honey-dew-oil'].map(productById);
-  const badges = ['Vegan', 'Cruelty-free', 'No fake tan smell', 'Streak-free', 'Transfer-resistant after rinse', 'Naturally derived hero ingredients'];
+function Hero({ onBook }: { onBook: () => void }) {
+  const badges = ['5-star glow experience', 'Vegan', 'Cruelty-free', 'No fake tan smell', 'Streak-free', 'Bridal-ready', 'Mobile tanning available'];
+  const heroProducts = ['peach-glaze', 'cocoa-drip', 'honey-dew-drops'].map(productById);
 
   return (
-    <section id="top" className="section-pad relative overflow-hidden bg-[radial-gradient(circle_at_18%_18%,#FFB38A55,transparent_28%),radial-gradient(circle_at_84%_12%,#B8A7FF55,transparent_30%),linear-gradient(135deg,#FFFDF6_0%,#FFF3DD_54%,#FFE2EC_100%)]">
-      <div className="whipped-shape left-[4%] top-24 h-32 w-32 bg-white/60" />
-      <div className="whipped-shape right-[8%] top-36 h-24 w-24 bg-mint/70" />
+    <section id="top" className="relative overflow-hidden bg-[radial-gradient(circle_at_12%_14%,rgba(255,179,138,0.36),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(184,167,255,0.32),transparent_26%),linear-gradient(135deg,#FFFFFA_0%,#FFF9EE_42%,#FFF3DD_100%)] px-4 pb-16 pt-10 sm:pb-20 lg:pb-24">
       <div className="bronze-ribbon animate-ribbon" />
+      <div className="whipped-shape left-[4%] top-24 h-32 w-32 bg-white/58" />
+      <div className="whipped-shape right-[9%] top-40 h-24 w-24 bg-mint/60" />
 
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:py-20 lg:grid-cols-[0.98fr_1.02fr] lg:py-24">
-        <div>
-          <h1 className="max-w-4xl font-display text-5xl font-black leading-[0.92] text-cocoa sm:text-6xl lg:text-7xl">
-            Whipped self tan for soft golden skin.
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="animate-fadeUp">
+          <h1 className="max-w-4xl font-display text-5xl font-semibold leading-[0.94] text-cocoa sm:text-6xl lg:text-7xl">
+            Melbourne's softest spray tan and whipped self-tan glow.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg font-semibold leading-8 text-charcoal/80 sm:text-xl">
-            Dessert-soft bronzing foams, gradual glow moisturiser, face drops, body blur, and tan-extending oil for a streak-free tan that looks expensive, not orange.
+          <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-charcoal/80 sm:text-xl">
+            Expert studio tans, mobile appointments, bridal bronze, competition colour, and dessert-soft at-home self-tanning products designed for a streak-free glow without the fake tan smell.
           </p>
-          <div className="mt-5 flex items-end justify-center gap-2 rounded-[30px] bg-white/45 p-3 shadow-sm sm:hidden">
-            <ProductRender product={heroProducts[0]} size="md" />
-            <ProductRender product={heroProducts[2]} size="sm" />
-            <ProductRender product={heroProducts[3]} size="sm" />
-          </div>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <button className="primary-button" onClick={onQuickStart}>
-              <WandSparkles size={20} />
-              Find My Glow
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <button className="primary-button" onClick={onBook}>
+              <CalendarDays size={20} />
+              Book Your Tan
             </button>
-            <a className="secondary-button" href="#shop">
-              Shop The Range
-            </a>
+            <button className="secondary-button" onClick={() => scrollToId('shop')}>
+              Shop Sorbet Skin
+            </button>
+            <button className="ghost-button" onClick={() => scrollToId('quiz')}>
+              Find My Glow
+              <ArrowRight size={18} />
+            </button>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-2">
-            {badges.map((badge) => (
-              <span key={badge} className="badge-pill bg-white/70 text-cocoa">
+            {badges.map((badge, index) => (
+              <span key={badge} className="badge-pill fade-badge bg-white/75 text-cocoa" style={{ animationDelay: `${index * 70}ms` }}>
                 <Sparkles size={14} />
                 {badge}
               </span>
             ))}
           </div>
-          <p className="mt-4 text-sm font-bold text-cocoa/70">Self-tan does not contain SPF. Wear SPF daily.</p>
+          <p className="mt-4 text-sm font-bold text-cocoa/70">{spfDisclaimer}</p>
         </div>
 
-        <div className="relative hidden min-h-[520px] sm:block">
-          <div className="sorbet-orbit">
-            <div className="scoop-shape scoop-one" />
-            <div className="scoop-shape scoop-two" />
-            <div className="foam-blob blob-one" />
-            <div className="foam-blob blob-two" />
-            <ProductRender product={heroProducts[0]} size="hero" float />
-            <div className="absolute left-[44%] top-[7%] rotate-6">
-              <ProductRender product={heroProducts[1]} size="lg" float />
-            </div>
-            <div className="absolute bottom-[12%] left-[10%] -rotate-6">
-              <ProductRender product={heroProducts[2]} size="md" float />
-            </div>
-            <div className="absolute bottom-[8%] right-[11%] rotate-3">
-              <ProductRender product={heroProducts[3]} size="md" float />
-            </div>
+        <div className="relative min-h-[440px] sm:min-h-[560px]">
+          <div className="hero-image-card">
+            <img src="/Product Line.png" alt="Sorbet Skin pastel product range with whipped dessert-inspired self-tanning packaging" />
+            <div className="hero-shine" />
           </div>
+          <div className="absolute -left-2 bottom-8 hidden rotate-[-8deg] sm:block">
+            <ProductRender product={heroProducts[0]} size="lg" float />
+          </div>
+          <div className="absolute -right-2 top-16 hidden rotate-[7deg] sm:block">
+            <ProductRender product={heroProducts[1]} size="md" float />
+          </div>
+          <div className="absolute bottom-2 right-20 hidden rotate-[5deg] md:block">
+            <ProductRender product={heroProducts[2]} size="sm" float />
+          </div>
+          <div className="foam-stroke left-[10%] top-[8%]" />
+          <div className="foam-stroke bottom-[12%] right-[9%]" />
         </div>
       </div>
     </section>
   );
 }
 
-function TrustStrip() {
-  const badges = [
-    { icon: Heart, title: 'Cruelty-free', copy: 'Never tested on animals.', tip: 'Brand positioning claim. Certification should be obtained before launch.', tone: 'bg-blush/18' },
-    { icon: Leaf, title: 'Vegan', copy: 'No animal-derived ingredients.', tip: 'Designed as a vegan range with final checks before commercial launch.', tone: 'bg-mint/45' },
-    { icon: Sparkles, title: 'No fake tan smell', copy: 'Made for glow without the old-school biscuit smell.', tip: 'A brand positioning claim subject to formulation testing.', tone: 'bg-peach/30' },
-    { icon: Droplets, title: 'Streak-free', copy: 'Designed to blend smoothly with the Velvet Mitt.', tip: 'Prep and blending help the finish look smooth.', tone: 'bg-lavender/22' },
-    { icon: ShieldCheck, title: 'Transfer-resistant', copy: 'Best once fully developed, rinsed, and dry.', tip: 'Careful claim language for real-world wear.', tone: 'bg-honey/18' },
-    { icon: Leaf, title: 'Natural-origin hero ingredients', copy: 'Powered by skin-loving botanical ingredients.', tip: 'Naturally derived hero ingredients, not an unsupported all-natural claim.', tone: 'bg-buttercream' },
-    { icon: Sun, title: 'SPF reminder', copy: 'Your glow is not UV protection. Wear SPF daily.', tip: 'Self-tan does not contain SPF.', tone: 'bg-white' },
-  ];
+function SocialProofStrip() {
+  const items = [
+    ['Custom colour matched', BadgeCheck],
+    ['Studio and mobile appointments', Truck],
+    ['Bridal glow specialists', Heart],
+    ['Competition tanning', Sparkles],
+    ['Prep and aftercare education', ShieldCheck],
+    ['At-home glow products', ShoppingBag],
+  ] as const;
 
   return (
-    <section className="bg-vanilla px-4 py-5">
-      <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-7">
-        {badges.map(({ icon: Icon, title, copy, tip, tone }) => (
-          <div key={title} className={cx('tooltip-card group rounded-[24px] border border-caramel/10 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-soft', tone)} tabIndex={0}>
-            <Icon className="mb-3 text-cocoa" size={22} />
-            <h3 className="text-sm font-black text-cocoa">{title}</h3>
-            <p className="mt-1 text-xs font-semibold leading-5 text-charcoal/70">{copy}</p>
-            <span className="tooltip-text">{tip}</span>
+    <section className="border-y border-caramel/10 bg-warmwhite px-4 py-5">
+      <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        {items.map(([label, Icon]) => (
+          <div key={label} className="proof-card">
+            <Icon size={20} />
+            <span>{label}</span>
           </div>
         ))}
       </div>
@@ -513,92 +386,385 @@ function TrustStrip() {
   );
 }
 
-function ProductCard({
-  product,
-  onAdd,
-  onQuickView,
-}: {
-  product: Product;
-  onAdd: (productId: string, quantity?: number) => void;
-  onQuickView: (product: Product) => void;
-}) {
-  const hasNoSmell = product.claims.some((claim) => claim.toLowerCase().includes('no fake tan smell'));
-
+function BookingPanel({ onBook }: { onBook: (service?: Service) => void }) {
   return (
-    <article className="product-card group">
-      <div className="relative overflow-hidden rounded-[30px] bg-gradient-to-br from-white via-buttercream to-peach/20 p-5">
-        <div className="absolute inset-x-8 top-10 h-20 rounded-full blur-2xl" style={{ backgroundColor: `${product.themeHex}36` }} />
-        <div className="relative mx-auto flex h-56 items-center justify-center">
-          <ProductRender product={product} size="lg" />
-        </div>
-        <div className="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-black text-cocoa shadow-sm">Vegan + cruelty-free</div>
-        {hasNoSmell && <div className="absolute bottom-4 right-4 rounded-full bg-cocoa px-3 py-1 text-xs font-black text-vanilla shadow-sm">No fake tan smell</div>}
-      </div>
-
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="font-display text-2xl font-black leading-none text-cocoa">{product.name}</h3>
-            <p className="mt-1 text-sm font-bold text-caramel">{product.type}</p>
-          </div>
-          <p className="shrink-0 rounded-full bg-buttercream px-3 py-1 text-sm font-black text-cocoa">{formatPrice(product.price)}</p>
-        </div>
-
-        <p className="mt-4 text-sm leading-6 text-charcoal/75">{product.copy}</p>
-
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <dt className="font-black text-cocoa">Shade</dt>
-            <dd className="text-charcoal/70">{product.shade}</dd>
-          </div>
-          <div>
-            <dt className="font-black text-cocoa">Scent</dt>
-            <dd className="text-charcoal/70">{product.scent}</dd>
-          </div>
-          <div className="col-span-2">
-            <dt className="font-black text-cocoa">Development</dt>
-            <dd className="text-charcoal/70">{product.developmentTime}</dd>
-          </div>
-        </dl>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {product.claims.slice(0, 4).map((claim) => (
-            <span key={claim} className="mini-chip">
-              {claim}
-            </span>
+    <section id="book" className="section-pad bg-vanilla px-4">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading eyebrow="Book online" title="Choose Your Glow Appointment" copy="Salon-grade spray tan services for everyday glow, weddings, mobile appointments, and stage-ready bronze." />
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {services.map((service) => (
+            <article key={service.id} className="service-card">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="tag-pill">{service.bestFor}</p>
+                  <h3 className="mt-4 font-display text-3xl font-semibold leading-none text-cocoa">{service.name}</h3>
+                </div>
+                <span className="price-pill">{service.price}</span>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2 text-sm font-black text-cocoa/80">
+                <span className="mini-chip"><Clock size={14} /> {service.duration}</span>
+                <span className="mini-chip"><Sparkles size={14} /> {service.developmentTime}</span>
+              </div>
+              <p className="mt-5 text-sm font-medium leading-7 text-charcoal/70">{service.description}</p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <button className="primary-button min-h-11 flex-1 justify-center px-4 py-2 text-sm" onClick={() => onBook(service)}>
+                  Book Now
+                </button>
+                <button className="secondary-button min-h-11 flex-1 px-4 py-2 text-sm" onClick={() => scrollToId('prep-care')}>
+                  View Prep Guide
+                </button>
+              </div>
+            </article>
           ))}
         </div>
-
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <Rating value={product.rating} />
-          <div className="flex gap-2">
-            <button className="small-button bg-buttercream text-cocoa hover:bg-peach/40" onClick={() => onQuickView(product)}>
-              Quick View
-            </button>
-            <button className="small-button bg-cocoa text-vanilla hover:bg-caramel" onClick={() => onAdd(product.id)}>
-              Add
-            </button>
-          </div>
-        </div>
       </div>
-    </article>
+    </section>
   );
 }
 
-function FilterGroup({
-  label,
-  values,
-  selected,
-  onToggle,
-}: {
-  label: string;
-  values: string[];
-  selected: string[];
-  onToggle: (value: string) => void;
-}) {
+function ServicesPage({ onBook }: { onBook: (service?: Service) => void }) {
+  const categories = [
+    ['Studio Tanning', 'Custom colour matching, skin tone consultation, rinse guidance, and a soft bronze finish.'],
+    ['Express Tanning', 'Fast-developing services for last-minute events and shorter rinse windows.'],
+    ['Mobile Tanning', 'Professional setup brought to your home, hotel, or event location.'],
+    ['Bridal Tanning', 'Trial-led bridal colour planning for dress tone, photography, and wedding timing.'],
+    ['Competition Tanning', 'Deeper bronze timing for stage lighting, performance events, and show schedules.'],
+    ['Group Bookings', 'Bridal parties, events, dance teams, and content days with coordinated timing.'],
+  ];
+
+  return (
+    <section id="services" className="section-pad bg-warmwhite px-4">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading eyebrow="Service menu" title="Professional tanning, built around your calendar." copy="Every appointment includes prep guidance, colour consultation, and aftercare notes. Self-tan does not contain SPF and does not protect against UV exposure. Wear SPF daily." />
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {categories.map(([title, copy]) => (
+            <div key={title} className="soft-panel p-6">
+              <Sparkles className="text-caramel" size={24} />
+              <h3 className="mt-4 font-display text-2xl font-semibold text-cocoa">{title}</h3>
+              <p className="mt-3 text-sm font-medium leading-7 text-charcoal/70">{copy}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="soft-panel p-6">
+            <h3 className="font-display text-3xl font-semibold text-cocoa">Add-ons</h3>
+            <div className="mt-5 grid gap-3">
+              {serviceAddons.map((addon) => (
+                <div key={addon.name} className="addon-row">
+                  <div>
+                    <h4>{addon.name}</h4>
+                    <p>{addon.copy}</p>
+                  </div>
+                  <span>{addon.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="soft-panel overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="service-table">
+                <thead>
+                  <tr>
+                    <th>Service</th>
+                    <th>Best for</th>
+                    <th>Development time</th>
+                    <th>Price</th>
+                    <th>Book</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {services.map((service) => (
+                    <tr key={service.id}>
+                      <td>{service.name}</td>
+                      <td>{service.bestFor}</td>
+                      <td>{service.developmentTime}</td>
+                      <td>{service.price}</td>
+                      <td>
+                        <button className="small-button bg-cocoa text-vanilla hover:bg-caramel" onClick={() => onBook(service)}>
+                          Book
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PackagesSection({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void }) {
+  const [gifted, setGifted] = useState<Record<string, boolean>>({});
+
+  return (
+    <section id="packages" className="section-pad bg-gradient-to-br from-buttercream via-vanilla to-peach/20 px-4">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading eyebrow="Prepaid packages" title="Glow More, Pay Less" copy="Prepay for your studio tans, keep them for yourself, or gift the glow to someone who lives by calendar reminders." />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {packages.map((pack) => (
+            <article key={pack.id} className="package-card">
+              {pack.badge && <span className="save-badge">{pack.badge}</span>}
+              <h3 className="font-display text-3xl font-semibold text-cocoa">{pack.name}</h3>
+              <p className="mt-3 text-sm font-bold text-charcoal/70">{pack.includes}</p>
+              <p className="mt-6 text-3xl font-black text-cocoa">{formatPrice(pack.price)}</p>
+              <label className="mt-5 flex items-center gap-3 rounded-full bg-white/70 px-4 py-3 text-sm font-black text-cocoa">
+                <input type="checkbox" checked={!!gifted[pack.id]} onChange={(event) => setGifted((current) => ({ ...current, [pack.id]: event.target.checked }))} />
+                Gift option
+              </label>
+              <button
+                className="primary-button mt-5 w-full justify-center"
+                onClick={() =>
+                  onAdd(
+                    {
+                      key: `package:${pack.id}:${gifted[pack.id] ? 'gift' : 'self'}`,
+                      kind: 'package',
+                      name: pack.name,
+                      price: pack.price,
+                      meta: `${pack.includes}${gifted[pack.id] ? ' | Gift option' : ''}`,
+                      accent: '#C9894B',
+                    },
+                    1,
+                  )
+                }
+              >
+                Add to cart
+              </button>
+              <p className="mt-4 text-xs font-bold leading-5 text-charcoal/60">Valid for 12 months from purchase. Appointment availability applies.</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
+  const [submitted, setSubmitted] = useState(false);
+
+  return (
+    <section id="bridal" className="section-pad bg-warmwhite px-4">
+      <div className="mx-auto max-w-7xl">
+        <div className="bridal-hero">
+          <div>
+            <p className="section-kicker">Bridal Glow</p>
+            <h2 className="font-display text-5xl font-semibold leading-none text-cocoa sm:text-6xl">Your wedding glow, colour matched.</h2>
+            <p className="mt-5 max-w-2xl text-lg font-medium leading-8 text-charcoal/75">
+              Bridal tans need softer planning: dress colour, photography, trial timing, party coordination, and a rinse plan that fits your wedding week.
+            </p>
+            <button className="primary-button mt-7" onClick={() => onBook(services.find((service) => service.id === 'bridal-trial-tan'))}>
+              Book Trial Tan
+            </button>
+          </div>
+          <div className="editorial-skin-frame bridal-skin" aria-label="Editorial bridal glow placeholder" />
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="soft-panel p-6">
+            <h3 className="font-display text-3xl font-semibold text-cocoa">Why bridal tans need a trial</h3>
+            <p className="mt-4 text-sm font-medium leading-7 text-charcoal/70">
+              A trial lets us test colour depth, undertone, fade pattern, and comfort before your final wedding week tan. It helps the finished glow feel like skin, not a surprise.
+            </p>
+            <div className="mt-5 grid gap-3">
+              {['Trial tan booking', 'Wedding week tan', 'Mobile bridal tanning', 'Bridal party packages', 'FAQ-ready prep notes'].map((item) => (
+                <div key={item} className="check-row">
+                  <Check size={17} />
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="soft-panel p-6">
+            <h3 className="font-display text-3xl font-semibold text-cocoa">Bridal timeline</h3>
+            <div className="mt-5 grid gap-3">
+              {bridalTimeline.map(([time, task]) => (
+                <div key={time} className="timeline-row">
+                  <span>{time}</span>
+                  <p>{task}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {bridalPackages.map((pack) => (
+            <article key={pack.name} className="package-card">
+              <h3 className="font-display text-2xl font-semibold text-cocoa">{pack.name}</h3>
+              <p className="mt-3 text-sm font-bold leading-6 text-charcoal/70">{pack.includes}</p>
+              <p className="mt-5 text-2xl font-black text-caramel">{pack.price}</p>
+            </article>
+          ))}
+        </div>
+
+        <form
+          className="form-panel mt-8"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSubmitted(true);
+          }}
+        >
+          <div>
+            <p className="section-kicker">Quote request</p>
+            <h3 className="font-display text-3xl font-semibold text-cocoa">Plan the bridal party glow.</h3>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Field label="Wedding date"><TextInput type="date" required /></Field>
+            <Field label="Location"><TextInput placeholder="Suburb or venue" required /></Field>
+            <Field label="Bridal party size"><TextInput type="number" min="1" placeholder="5" /></Field>
+            <Field label="Dress colour"><TextInput placeholder="Ivory, white, blush..." /></Field>
+            <Field label="Skin tone"><SelectInput><option>Fair</option><option>Light</option><option>Medium</option><option>Olive</option><option>Deep</option></SelectInput></Field>
+            <Field label="Desired colour"><SelectInput><option>Soft bridal glow</option><option>Golden bronze</option><option>Deeper bronze</option></SelectInput></Field>
+          </div>
+          {submitted ? <p className="success-message">Your bridal glow request has been received. We will be in touch with a tailored quote.</p> : <button className="primary-button w-fit">Request Bridal Quote</button>}
+        </form>
+      </div>
+    </section>
+  );
+}
+
+function MobileTanningPage({ onBook }: { onBook: (service?: Service) => void }) {
+  const [people, setPeople] = useState(1);
+  const [postcode, setPostcode] = useState('');
+  const [serviceType, setServiceType] = useState('Signature mobile');
+  const base = serviceType === 'Bridal mobile' ? 145 : serviceType === 'Competition mobile' ? 130 : 95;
+  const estimate = base + Math.max(0, people - 1) * 45 + (postcode.length >= 4 && !postcode.startsWith('3') ? 25 : 0);
+
+  return (
+    <section id="mobile" className="section-pad bg-vanilla px-4">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading eyebrow="Mobile tanning" title="Sorbet Skin comes to you." copy="A professional mobile tanning setup for homes, hotels, bridal suites, group bookings, and event prep across selected Melbourne areas." />
+        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid gap-5 sm:grid-cols-2">
+            {[
+              ['How mobile tanning works', 'Tell us your date, location, group size, and tan goals. We confirm timing, setup, and travel notes.'],
+              ['Service area', 'Selected Melbourne suburbs with travel notes based on postcode, parking, and appointment time.'],
+              ['Pricing', 'Mobile tans start from $95, with group pricing and bridal quotes available.'],
+              ['Group bookings', 'Perfect for bridal parties, event squads, dance teams, and content days.'],
+            ].map(([title, copy]) => (
+              <div key={title} className="soft-panel p-6">
+                <Truck className="text-caramel" size={24} />
+                <h3 className="mt-4 font-display text-2xl font-semibold text-cocoa">{title}</h3>
+                <p className="mt-3 text-sm font-medium leading-7 text-charcoal/70">{copy}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="soft-panel p-6">
+            <div className="map-placeholder">
+              <span>Melbourne</span>
+              <i className="pin pin-one" />
+              <i className="pin pin-two" />
+              <i className="pin pin-three" />
+            </div>
+            <h3 className="mt-6 font-display text-3xl font-semibold text-cocoa">Setup requirements</h3>
+            <div className="mt-4 grid gap-2">
+              {['Private space', 'Good lighting', 'Power access if required', 'Ventilation', 'Loose dark clothing ready', 'No deodorant, perfume, or moisturiser on skin'].map((item) => (
+                <div key={item} className="check-row"><Check size={17} /> {item}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="calculator-panel mt-8">
+          <div>
+            <p className="section-kicker">Mobile booking calculator</p>
+            <h3 className="font-display text-3xl font-semibold text-cocoa">Estimate your starting price.</h3>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <Field label="Postcode"><TextInput value={postcode} onChange={(event) => setPostcode(event.target.value)} placeholder="3000" /></Field>
+            <Field label="People"><TextInput type="number" min="1" value={people} onChange={(event) => setPeople(Number(event.target.value))} /></Field>
+            <Field label="Service type"><SelectInput value={serviceType} onChange={(event) => setServiceType(event.target.value)}><option>Signature mobile</option><option>Bridal mobile</option><option>Competition mobile</option></SelectInput></Field>
+            <Field label="Event date"><TextInput type="date" /></Field>
+            <Field label="Preferred time"><TextInput type="time" /></Field>
+          </div>
+          <div className="quote-output">
+            <div>
+              <span>Estimated starting price</span>
+              <strong>{formatPrice(estimate)}</strong>
+              <p>Travel confirmed after postcode, parking, and setup details are reviewed.</p>
+            </div>
+            <button className="primary-button" onClick={() => onBook(services.find((service) => service.id === 'mobile-tan'))}>
+              Request Mobile Booking
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CompetitionPage() {
+  const [submitted, setSubmitted] = useState(false);
+
+  return (
+    <section id="competition" className="section-pad bg-warmwhite px-4">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+          <div>
+            <p className="section-kicker">Competition Bronze</p>
+            <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Stage-ready bronze for fitness, dance, pageant, and performance clients.</h2>
+            <p className="mt-5 text-lg font-medium leading-8 text-charcoal/75">
+              Competition tans are built around lighting, schedule, suit or costume colour, and event-day touch points. We keep the guidance practical and skin-safe.
+            </p>
+          </div>
+          <div className="soft-panel p-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                ['Why competition tans are different', 'Stage lighting can flatten colour, so depth and timing matter.'],
+                ['Base coat and top coat education', 'Plan the right appointment rhythm for your event format.'],
+                ['Event-day timing', 'Book early and leave room for follow-up guidance.'],
+                ['Skin prep', 'Hydrate skin in the days before, then arrive with clean, dry skin.'],
+                ['Deep bronze options', 'Choose depth around show lighting and category needs.'],
+                ['Rinse instructions', 'Follow your personalised rinse timing and aftercare notes.'],
+              ].map(([title, copy]) => (
+                <div key={title} className="rounded-[24px] bg-vanilla/80 p-4">
+                  <h3 className="font-black text-cocoa">{title}</h3>
+                  <p className="mt-2 text-sm font-medium leading-6 text-charcoal/70">{copy}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5 rounded-[24px] bg-cocoa p-5 text-sm font-bold leading-7 text-vanilla">
+              Book early. Avoid moisturiser and deodorant before application. Wear loose clothing. Follow rinse instructions. Hydrate skin in the days before appointment.
+            </div>
+          </div>
+        </div>
+
+        <form
+          className="form-panel mt-8"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSubmitted(true);
+          }}
+        >
+          <div>
+            <p className="section-kicker">Booking form</p>
+            <h3 className="font-display text-3xl font-semibold text-cocoa">Tell us about the event.</h3>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Field label="Name"><TextInput required /></Field>
+            <Field label="Email"><TextInput type="email" required /></Field>
+            <Field label="Event type"><SelectInput><option>Fitness</option><option>Dance</option><option>Pageant</option><option>Performance</option></SelectInput></Field>
+            <Field label="Event date"><TextInput type="date" required /></Field>
+          </div>
+          <Field label="Notes"><TextArea placeholder="Show time, category, costume colour, preferred depth..." /></Field>
+          {submitted ? <p className="success-message">Your competition bronze request has been received. We will confirm timing shortly.</p> : <button className="primary-button w-fit">Request Competition Booking</button>}
+        </form>
+      </div>
+    </section>
+  );
+}
+
+function FilterGroup({ label, values, selected, onToggle }: { label: string; values: string[]; selected: string[]; onToggle: (value: string) => void }) {
   return (
     <div>
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-black uppercase text-cocoa">
+      <h3 className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.08em] text-cocoa">
         <SlidersHorizontal size={15} />
         {label}
       </h3>
@@ -616,15 +782,45 @@ function FilterGroup({
   );
 }
 
-function ProductRange({
-  onAdd,
-  onQuickView,
-}: {
-  onAdd: (productId: string, quantity?: number) => void;
-  onQuickView: (product: Product) => void;
-}) {
-  const [filters, setFilters] = useState<FilterState>(initialFilters);
+function ProductCard({ product, onAdd, onQuickView }: { product: Product; onAdd: (product: Product, quantity?: number) => void; onQuickView: (product: Product) => void }) {
+  return (
+    <article className="product-card group">
+      <div className="product-card-media">
+        <div className="absolute inset-x-8 top-10 h-20 rounded-full blur-2xl" style={{ backgroundColor: `${product.themeHex}36` }} />
+        <ProductRender product={product} size="lg" />
+        <span className="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-black text-cocoa shadow-sm">Vegan + cruelty-free</span>
+      </div>
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="font-display text-2xl font-semibold leading-none text-cocoa">{product.name}</h3>
+            <p className="mt-1 text-sm font-bold text-caramel">{product.type}</p>
+          </div>
+          <p className="price-pill shrink-0">{formatPrice(product.price)}</p>
+        </div>
+        <p className="mt-4 text-sm font-medium leading-6 text-charcoal/70">{product.copy}</p>
+        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div><dt>Shade</dt><dd>{product.shade}</dd></div>
+          <div><dt>Scent</dt><dd>{product.scent}</dd></div>
+          <div className="col-span-2"><dt>Development</dt><dd>{product.developmentTime}</dd></div>
+        </dl>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {product.claims.slice(0, 4).map((claim) => <span key={claim} className="mini-chip">{claim}</span>)}
+        </div>
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <Rating value={product.rating} />
+          <div className="flex gap-2">
+            <button className="small-button bg-buttercream text-cocoa hover:bg-peach/40" onClick={() => onQuickView(product)}>Quick view</button>
+            <button className="small-button bg-cocoa text-vanilla hover:bg-caramel" onClick={() => onAdd(product)}>Add to cart</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
 
+function ShopPage({ onAdd, onQuickView }: { onAdd: (product: Product, quantity?: number) => void; onQuickView: (product: Product) => void }) {
+  const [filters, setFilters] = useState<FilterState>(initialFilters);
   const toggleFilter = (group: keyof Omit<FilterState, 'sort'>, value: string) => {
     setFilters((current) => ({
       ...current,
@@ -636,146 +832,94 @@ function ProductRange({
     const next = products.filter((product) => {
       const shadeMatch = filters.shade.length === 0 || filters.shade.includes(product.shade);
       const typeMatch = filters.category.length === 0 || filters.category.includes(product.category);
-      const claimMatch = filters.claims.length === 0 || filters.claims.every((claim) => matchesClaim(product, claim));
-      const developmentMatch = filters.developmentTime.length === 0 || filters.developmentTime.some((time) => product.developmentTime.toLowerCase().includes(time.toLowerCase()));
+      const developmentMatch = filters.developmentTime.length === 0 || filters.developmentTime.includes(product.developmentTime);
       const scentMatch = filters.scent.length === 0 || filters.scent.includes(product.scent);
-      return shadeMatch && typeMatch && claimMatch && developmentMatch && scentMatch;
+      const claimMatch = filters.claims.length === 0 || filters.claims.every((claim) => matchesClaim(product, claim));
+      return shadeMatch && typeMatch && developmentMatch && scentMatch && claimMatch;
     });
-
-    if (filters.sort === 'low') {
-      return [...next].sort((a, b) => a.price - b.price);
-    }
-
-    if (filters.sort === 'high') {
-      return [...next].sort((a, b) => b.price - a.price);
-    }
-
+    if (filters.sort === 'low') return [...next].sort((a, b) => a.price - b.price);
+    if (filters.sort === 'high') return [...next].sort((a, b) => b.price - a.price);
     return next;
   }, [filters]);
 
   return (
     <section id="shop" className="section-pad bg-vanilla px-4">
       <div className="mx-auto max-w-7xl">
-        <div className="section-heading">
-          <h2>Shop the whipped glow range.</h2>
-          <p>Foams, drops, body blur, prep, maintenance, and salon-ready pro concentrate, all dressed in shelf-pop sorbet colour.</p>
-        </div>
+        <SectionHeading eyebrow="Shop" title="Self-tanning products, dressed like dessert." copy="Foaming body tan, gradual glow, face drops, body blur, prep, and tools for a beginner-friendly routine that feels salon-grade." />
 
-        <div className="rounded-[32px] border border-caramel/10 bg-white/70 p-5 shadow-soft sm:p-6">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto]">
-            <div className="grid gap-6">
-              <FilterGroup label="Shade" values={shadeFilters} selected={filters.shade} onToggle={(value) => toggleFilter('shade', value)} />
-              <FilterGroup label="Product type" values={typeFilters} selected={filters.category} onToggle={(value) => toggleFilter('category', value)} />
-              <FilterGroup label="Claims" values={claimFilters} selected={filters.claims} onToggle={(value) => toggleFilter('claims', value)} />
-              <FilterGroup label="Development time" values={developmentFilters} selected={filters.developmentTime} onToggle={(value) => toggleFilter('developmentTime', value)} />
-              <FilterGroup label="Scent" values={scentFilters} selected={filters.scent} onToggle={(value) => toggleFilter('scent', value)} />
-            </div>
-            <div className="min-w-[210px]">
-              <label htmlFor="price-sort" className="mb-3 block text-sm font-black uppercase text-cocoa">
-                Price sorting
-              </label>
-              <select id="price-sort" className="w-full rounded-full border border-caramel/20 bg-vanilla px-4 py-3 text-sm font-black text-cocoa outline-none focus:border-blush" value={filters.sort} onChange={(event) => setFilters((current) => ({ ...current, sort: event.target.value as FilterState['sort'] }))}>
+        <div className="filter-panel">
+          <div className="grid gap-6">
+            <FilterGroup label="Shade" values={shadeFilters} selected={filters.shade} onToggle={(value) => toggleFilter('shade', value)} />
+            <FilterGroup label="Product type" values={typeFilters} selected={filters.category} onToggle={(value) => toggleFilter('category', value)} />
+            <FilterGroup label="Development time" values={developmentFilters} selected={filters.developmentTime} onToggle={(value) => toggleFilter('developmentTime', value)} />
+            <FilterGroup label="Scent" values={scentFilters} selected={filters.scent} onToggle={(value) => toggleFilter('scent', value)} />
+            <FilterGroup label="Claims" values={claimFilters} selected={filters.claims} onToggle={(value) => toggleFilter('claims', value)} />
+          </div>
+          <div className="min-w-[220px]">
+            <Field label="Sort products">
+              <SelectInput value={filters.sort} onChange={(event) => setFilters((current) => ({ ...current, sort: event.target.value as FilterState['sort'] }))}>
                 <option value="featured">Featured</option>
-                <option value="low">Low to high</option>
-                <option value="high">High to low</option>
-              </select>
-              <button className="mt-4 w-full rounded-full bg-cocoa px-4 py-3 text-sm font-black text-vanilla transition hover:bg-caramel" onClick={() => setFilters(initialFilters)}>
-                Reset filters
-              </button>
-            </div>
+                <option value="low">Price low to high</option>
+                <option value="high">Price high to low</option>
+              </SelectInput>
+            </Field>
+            <button className="secondary-button mt-4 w-full min-h-11" onClick={() => setFilters(initialFilters)}>Reset filters</button>
           </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-between gap-4">
-          <p className="text-sm font-black uppercase text-caramel">{filteredProducts.length} products</p>
+        <div className="mt-7 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-black uppercase tracking-[0.08em] text-caramel">{filteredProducts.length} products</p>
           <p className="text-sm font-bold text-charcoal/70">Transfer-resistant claim applies once fully developed, rinsed, and dry.</p>
         </div>
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onAdd={onAdd} onQuickView={onQuickView} />
-          ))}
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {filteredProducts.map((product) => <ProductCard key={product.id} product={product} onAdd={onAdd} onQuickView={onQuickView} />)}
         </div>
       </div>
     </section>
   );
 }
 
-function QuickViewModal({
-  product,
-  onClose,
-  onAdd,
-}: {
-  product: Product | null;
-  onClose: () => void;
-  onAdd: (productId: string, quantity?: number) => void;
-}) {
+function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; onClose: () => void; onAdd: (product: Product, quantity?: number) => void }) {
+  const [tab, setTab] = useState<'Details' | 'How to Use' | 'Ingredients' | 'Safety'>('Details');
   const [quantity, setQuantity] = useState(1);
-  const [tab, setTab] = useState<'Details' | 'How to use' | 'Ingredients' | 'Safety'>('Details');
 
   useEffect(() => {
-    if (!product) {
-      return;
+    if (product) {
+      setTab('Details');
+      setQuantity(1);
     }
-
-    setQuantity(1);
-    setTab('Details');
   }, [product]);
 
   useEffect(() => {
-    if (!product) {
-      return;
-    }
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
+    if (!product) return;
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose, product]);
 
-  if (!product) {
-    return null;
-  }
-
-  const howToUse =
-    product.category === 'Tool'
-      ? ['Slip hand into the mitt.', 'Pump your foam or body blur onto the velvet side.', 'Blend in long sweeping motions and rinse the mitt after use.']
-      : product.category === 'Pro Spray'
-        ? ['For trained salon operators and compatible spray booth systems only.', 'Prep skin, apply evenly using a professional salon process, let colour develop, then rinse as directed.', 'Moisturise after rinsing and keep skin hydrated.']
-        : product.category === 'Face Drops'
-          ? ['Mix drops into moisturiser in your palm.', 'Apply evenly over face, neck, and hairline.', 'Wash hands after application and let glow develop overnight.']
-          : product.category === 'Instant Body Blur'
-            ? ['Apply to dry skin where you want instant bronze.', 'Blend with Velvet Mitt and allow to dry before dressing.', 'Wash off with body wash when ready.']
-            : ['Apply to clean, dry skin using Velvet Mitt.', 'Blend in long sweeping motions and use sparingly on dry areas.', 'Allow to develop, rinse, dry fully, and wear SPF daily.'];
+  if (!product) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-cocoa/45 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="quick-view-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[36px] bg-vanilla shadow-gloss">
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="quick-view-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <div className="modal-card max-w-5xl">
         <div className="grid gap-6 p-5 sm:p-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[32px] bg-gradient-to-br from-white via-buttercream to-peach/20 p-8">
+          <div className="rounded-[30px] bg-gradient-to-br from-white via-buttercream to-peach/20 p-8">
             <ProductRender product={product} size="hero" />
           </div>
           <div>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-black uppercase text-caramel">{product.category}</p>
-                <h2 id="quick-view-title" className="mt-2 font-display text-4xl font-black leading-none text-cocoa">
-                  {product.name}
-                </h2>
+                <p className="section-kicker">{product.category}</p>
+                <h2 id="quick-view-title" className="font-display text-4xl font-semibold leading-none text-cocoa">{product.name}</h2>
                 <p className="mt-2 text-lg font-bold text-charcoal/70">{product.type}</p>
               </div>
-              <button className="icon-button bg-white" onClick={onClose} aria-label="Close quick view">
-                <X size={21} />
-              </button>
+              <button className="icon-button bg-white" onClick={onClose} aria-label="Close quick view"><X size={21} /></button>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Rating value={product.rating} />
-              <span className="rounded-full bg-cocoa px-4 py-2 text-sm font-black text-vanilla">{formatPrice(product.price)}</span>
+              <span className="price-pill">{formatPrice(product.price)}</span>
             </div>
 
             <dl className="mt-6 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
@@ -785,35 +929,31 @@ function QuickViewModal({
                 ['Finish', product.finish],
                 ['Development', product.developmentTime],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-[22px] bg-white/70 p-3">
+                <div key={label} className="rounded-[20px] bg-white/70 p-3">
                   <dt className="font-black text-cocoa">{label}</dt>
-                  <dd className="mt-1 text-charcoal/70">{value}</dd>
+                  <dd className="mt-1 font-medium text-charcoal/70">{value}</dd>
                 </div>
               ))}
             </dl>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              {product.claims.map((claim) => (
-                <span key={claim} className="mini-chip">
-                  {claim}
-                </span>
-              ))}
+              {product.claims.map((claim) => <span key={claim} className="mini-chip">{claim}</span>)}
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2 border-b border-caramel/10 pb-3">
-              {(['Details', 'How to use', 'Ingredients', 'Safety'] as const).map((item) => (
+              {(['Details', 'How to Use', 'Ingredients', 'Safety'] as const).map((item) => (
                 <button key={item} className={cx('tab-button', tab === item && 'tab-button-active')} onClick={() => setTab(item)}>
                   {item}
                 </button>
               ))}
             </div>
 
-            <div className="min-h-40 py-5 text-charcoal/80">
-              {tab === 'Details' && <p className="text-base font-semibold leading-7">{product.copy}</p>}
-              {tab === 'How to use' && (
+            <div className="min-h-40 py-5 text-sm font-medium leading-7 text-charcoal/80">
+              {tab === 'Details' && <p>{product.copy}</p>}
+              {tab === 'How to Use' && (
                 <ol className="grid gap-3">
-                  {howToUse.map((step, index) => (
-                    <li key={step} className="flex gap-3 rounded-[22px] bg-white/60 p-3 font-semibold">
+                  {product.howToUse.map((step, index) => (
+                    <li key={step} className="flex gap-3 rounded-[20px] bg-white/70 p-3">
                       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-peach text-sm font-black text-cocoa">{index + 1}</span>
                       {step}
                     </li>
@@ -822,45 +962,27 @@ function QuickViewModal({
               )}
               {tab === 'Ingredients' && (
                 <div className="grid gap-3">
-                  {product.heroIngredients.length > 0 ? (
-                    product.heroIngredients.map((ingredient) => (
-                      <div key={ingredient} className="rounded-[22px] bg-white/70 p-4">
-                        <h3 className="font-black text-cocoa">{ingredient}</h3>
-                        <p className="mt-1 text-sm font-semibold leading-6">{ingredientInfo[ingredient] ?? 'A beauty-focused hero ingredient selected for a soft skin feel.'}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="font-semibold">Soft-touch reusable tool for blending Sorbet Skin formulas.</p>
-                  )}
+                  {product.ingredients.map((item) => <p key={item} className="rounded-[20px] bg-white/70 p-4">{item}</p>)}
                 </div>
               )}
               {tab === 'Safety' && (
-                <ul className="grid gap-2 text-sm font-semibold leading-6">
-                  <li>External use only.</li>
-                  <li>Patch test before use.</li>
-                  <li>Avoid eyes and broken skin.</li>
+                <ul className="grid gap-2">
+                  {safetyNotes.map((note) => <li key={note}>{note}</li>)}
                   <li>Wash hands after application.</li>
                   <li>Self-tan does not contain SPF.</li>
                   <li>Wear SPF daily.</li>
-                  <li>Stop use if irritation occurs.</li>
                   <li>Transfer-resistant claim applies once fully developed, rinsed, and dry.</li>
                 </ul>
               )}
             </div>
 
-            <div className="flex flex-col gap-3 rounded-[28px] bg-white/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-[24px] bg-white/70 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <button className="icon-button bg-buttercream" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity">
-                  <Minus size={18} />
-                </button>
+                <button className="quantity-button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity"><Minus size={18} /></button>
                 <span className="min-w-8 text-center text-lg font-black text-cocoa">{quantity}</span>
-                <button className="icon-button bg-buttercream" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity">
-                  <Plus size={18} />
-                </button>
+                <button className="quantity-button" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity"><Plus size={18} /></button>
               </div>
-              <button className="primary-button justify-center" onClick={() => onAdd(product.id, quantity)}>
-                Add to Cart
-              </button>
+              <button className="primary-button justify-center" onClick={() => onAdd(product, quantity)}>Add to Cart</button>
             </div>
           </div>
         </div>
@@ -869,52 +991,90 @@ function QuickViewModal({
   );
 }
 
-function GlowQuiz({
-  onAddBundle,
-  onQuickView,
-}: {
-  onAddBundle: (ids: string[], name: string, discountRate?: number) => void;
-  onQuickView: (product: Product) => void;
-}) {
+function GlowQuiz({ onBook, onAddProducts }: { onBook: (service?: Service) => void; onAddProducts: (ids: string[]) => void }) {
   const [answers, setAnswers] = useState<QuizAnswerMap>({});
   const [step, setStep] = useState(0);
   const complete = Object.keys(answers).length === quizQuestions.length;
   const current = quizQuestions[step];
-  const recommendationIds = complete ? getRecommendations(answers) : [];
-  const recommendedProducts = recommendationIds.map(productById);
-  const total = recommendedProducts.reduce((sum, product) => sum + product.price, 0);
+
+  const result = useMemo(() => {
+    if (!complete) return null;
+    if (answers.event === 'Wedding month' || answers.result === 'Bridal glow') {
+      return {
+        title: 'Bridal Trial Tan + bridal maintenance',
+        serviceId: 'bridal-trial-tan',
+        ids: ['vanilla-veil', 'honey-dew-drops'],
+        prep: 'Book your trial 6 to 8 weeks before, then finalise colour 2 weeks before.',
+      };
+    }
+    if (answers.event === 'Tonight' || answers.result === 'Instant event glow') {
+      return {
+        title: 'Express Glow Tan + instant polish',
+        serviceId: 'express-glow-tan',
+        ids: ['champagne-blur', 'velvet-mitt'],
+        prep: 'Choose express service, wear loose clothing, and keep skin dry until first rinse.',
+      };
+    }
+    if (answers.event === 'Competition week' || answers.result === 'Competition bronze') {
+      return {
+        title: 'Competition Bronze + prep foam',
+        serviceId: 'competition-bronze',
+        ids: ['coconut-melt'],
+        prep: 'Book early, prep skin well, and follow event timing instructions.',
+      };
+    }
+    if (answers.result === 'Deep bronze' || answers.tone === 'Deep') {
+      return {
+        title: 'Deep bronze at-home routine',
+        serviceId: undefined,
+        ids: ['cocoa-drip', 'velvet-mitt', 'champagne-blur'],
+        prep: 'Prep 24 hours before, apply express foam, then use body blur for event polish.',
+      };
+    }
+    if (answers.event === 'No event, daily glow') {
+      return {
+        title: 'Daily gradual glow',
+        serviceId: undefined,
+        ids: ['vanilla-veil', 'honey-dew-drops'],
+        prep: 'Apply gradual glow daily or every second day and hydrate skin between applications.',
+      };
+    }
+    return {
+      title: 'At-home beginner glow',
+      serviceId: undefined,
+      ids: ['peach-glaze', 'coconut-melt', 'velvet-mitt'],
+      prep: 'Remove old tan, exfoliate 24 hours before, then apply Peach Glaze with Velvet Mitt.',
+    };
+  }, [answers, complete]);
 
   const choose = (answer: string) => {
     setAnswers((currentAnswers) => ({ ...currentAnswers, [current.id]: answer }));
     setStep((currentStep) => Math.min(quizQuestions.length - 1, currentStep + 1));
   };
 
-  const retake = () => {
-    setAnswers({});
-    setStep(0);
-  };
+  const recommendedProducts = result ? result.ids.map(productById) : [];
+  const service = result?.serviceId ? services.find((item) => item.id === result.serviceId) : undefined;
+  const estimated = recommendedProducts.reduce((sum, product) => sum + product.price, 0) + (service?.numericPrice ?? 0);
 
   return (
     <section id="quiz" className="section-pad bg-gradient-to-br from-buttercream via-vanilla to-mint/40 px-4">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <p className="section-kicker">Find My Glow</p>
-          <h2 className="font-display text-4xl font-black leading-none text-cocoa sm:text-5xl">Your tan routine, minus the guesswork.</h2>
-          <p className="mt-4 max-w-xl text-lg font-semibold leading-8 text-charcoal/75">
-            Answer six quick beauty questions and Sorbet Skin will build a glow stack that fits your timing, skin vibe, scent mood, and finish.
+          <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Find My Glow</h2>
+          <p className="mt-5 max-w-xl text-lg font-medium leading-8 text-charcoal/75">
+            Match your event, skin tone, preferred format, and finish to a Sorbet Skin appointment or at-home product routine.
           </p>
         </div>
 
-        <div className="rounded-[36px] border border-caramel/10 bg-white/75 p-5 shadow-gloss sm:p-7">
+        <div className="rounded-[34px] border border-caramel/10 bg-white/80 p-5 shadow-gloss sm:p-7">
           {!complete ? (
             <>
               <div className="mb-5 h-3 overflow-hidden rounded-full bg-buttercream">
                 <div className="h-full rounded-full bg-gradient-to-r from-peach via-blush to-lavender transition-all" style={{ width: `${((Object.keys(answers).length + 1) / quizQuestions.length) * 100}%` }} />
               </div>
-              <p className="text-sm font-black uppercase text-caramel">
-                Question {step + 1} of {quizQuestions.length}
-              </p>
-              <h3 className="mt-2 font-display text-3xl font-black text-cocoa">{current.label}</h3>
+              <p className="section-kicker">Question {step + 1} of {quizQuestions.length}</p>
+              <h3 className="mt-2 font-display text-3xl font-semibold text-cocoa">{current.label}</h3>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {current.options.map((option) => (
                   <button key={option} className="quiz-option" onClick={() => choose(option)}>
@@ -922,39 +1082,38 @@ function GlowQuiz({
                   </button>
                 ))}
               </div>
-              {step > 0 && (
-                <button className="mt-5 text-sm font-black text-caramel underline decoration-peach decoration-4 underline-offset-4" onClick={() => setStep((currentStep) => Math.max(0, currentStep - 1))}>
-                  Back one question
-                </button>
-              )}
+              {step > 0 && <button className="mt-5 text-sm font-black text-caramel underline decoration-peach decoration-4 underline-offset-4" onClick={() => setStep((currentStep) => Math.max(0, currentStep - 1))}>Back one question</button>}
             </>
-          ) : (
+          ) : result && (
             <div>
-              <p className="section-kicker">Your Sorbet match</p>
-              <h3 className="font-display text-3xl font-black text-cocoa">A soft-focus routine built for you.</h3>
+              <p className="section-kicker">Your recommendation</p>
+              <h3 className="font-display text-3xl font-semibold text-cocoa">{result.title}</h3>
+              <p className="mt-3 text-sm font-medium leading-7 text-charcoal/75">{result.prep}</p>
               <div className="mt-5 grid gap-4 sm:grid-cols-3">
+                {service && (
+                  <div className="rounded-[24px] bg-buttercream/80 p-4">
+                    <SprayCan className="text-caramel" />
+                    <h4 className="mt-3 font-display text-xl font-semibold text-cocoa">{service.name}</h4>
+                    <p className="mt-1 text-sm font-bold text-charcoal/70">{service.price}</p>
+                  </div>
+                )}
                 {recommendedProducts.map((product) => (
-                  <button key={product.id} className="rounded-[28px] bg-buttercream/70 p-4 text-left transition hover:-translate-y-1 hover:shadow-soft" onClick={() => onQuickView(product)}>
+                  <div key={product.id} className="rounded-[24px] bg-buttercream/80 p-4">
                     <ProductRender product={product} size="sm" />
-                    <h4 className="mt-3 font-display text-xl font-black text-cocoa">{product.name}</h4>
-                    <p className="text-sm font-bold text-caramel">{product.type}</p>
-                  </button>
+                    <h4 className="mt-2 font-display text-xl font-semibold text-cocoa">{product.name}</h4>
+                    <p className="text-sm font-bold text-charcoal/70">{formatPrice(product.price)}</p>
+                  </div>
                 ))}
               </div>
-              <div className="mt-5 rounded-[28px] bg-vanilla p-5">
-                <h4 className="font-black text-cocoa">Custom routine</h4>
-                <p className="mt-2 text-sm font-semibold leading-6 text-charcoal/75">
-                  Prep skin, apply your recommended base with Velvet Mitt when included, layer face glow where needed, then keep skin hydrated so the glow fades evenly.
-                </p>
-                <p className="mt-3 text-lg font-black text-cocoa">Estimated total: {formatPrice(total)}</p>
+              <div className="mt-5 rounded-[24px] bg-vanilla p-5">
+                <h4 className="font-black text-cocoa">Prep timeline</h4>
+                <p className="mt-2 text-sm font-medium leading-6 text-charcoal/70">{result.prep}</p>
+                <p className="mt-3 text-lg font-black text-cocoa">Estimated cost: {formatPrice(estimated)}</p>
               </div>
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <button className="primary-button justify-center" onClick={() => onAddBundle(recommendationIds, 'Find My Glow Bundle', 0.15)}>
-                  Add Recommended Bundle
-                </button>
-                <button className="secondary-button justify-center" onClick={retake}>
-                  Retake Quiz
-                </button>
+                <button className="primary-button justify-center" onClick={() => service ? onBook(service) : scrollToId('shop')}>Book recommended glow</button>
+                <button className="secondary-button justify-center" onClick={() => onAddProducts(result.ids)}>Add product routine to cart</button>
+                <button className="ghost-button justify-center" onClick={() => { setAnswers({}); setStep(0); }}>Retake</button>
               </div>
             </div>
           )}
@@ -964,718 +1123,570 @@ function GlowQuiz({
   );
 }
 
-function BundleBuilder({
-  onAddBundle,
-}: {
-  onAddBundle: (ids: string[], name: string, discountRate?: number) => void;
-}) {
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const selectedProducts = selectedIds.map(productById);
-  const subtotal = selectedProducts.reduce((sum, product) => sum + product.price, 0);
-  const discount = selectedIds.length === 3 ? subtotal * 0.15 : 0;
-  const finalPrice = subtotal - discount;
-
-  const toggle = (id: string) => {
-    setSelectedIds((current) => {
-      if (current.includes(id)) {
-        return current.filter((item) => item !== id);
-      }
-
-      if (current.length === 3) {
-        return current;
-      }
-
-      return [...current, id];
-    });
-  };
+function PrepCarePage() {
+  const [eventDate, setEventDate] = useState('');
+  const [serviceType, setServiceType] = useState('Signature Studio Tan');
+  const [dryness, setDryness] = useState('Normal');
+  const [depth, setDepth] = useState('Golden bronze');
+  const date = eventDate ? new Date(`${eventDate}T12:00:00`) : null;
 
   return (
-    <section id="bundles" className="section-pad bg-vanilla px-4">
+    <section id="prep-care" className="section-pad bg-warmwhite px-4">
       <div className="mx-auto max-w-7xl">
-        <div className="section-heading">
-          <h2>Build Your Glow Stack</h2>
-          <p>Pick your base, your face glow, and your finishing touch. Choose any 3 products and the 15 percent bundle discount drops in automatically.</p>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div>
-            <div className="mb-5 flex flex-wrap gap-2">
-              {presetBundles.map((bundle) => (
-                <button key={bundle.name} className="filter-chip bg-white" onClick={() => setSelectedIds(bundle.ids)}>
-                  {bundle.name}
-                </button>
-              ))}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {products.map((product) => {
-                const active = selectedIds.includes(product.id);
-                const disabled = selectedIds.length === 3 && !active;
-                return (
-                  <button key={product.id} className={cx('bundle-choice', active && 'bundle-choice-active')} disabled={disabled} onClick={() => toggle(product.id)} aria-pressed={active}>
-                    <ProductRender product={product} size="sm" />
-                    <span className="block font-display text-xl font-black text-cocoa">{product.name}</span>
-                    <span className="block text-sm font-bold text-charcoal/70">{formatPrice(product.price)}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <aside className="sticky top-32 h-fit rounded-[36px] border border-caramel/10 bg-gradient-to-br from-buttercream via-white to-peach/20 p-6 shadow-gloss">
-            <p className="section-kicker">{selectedIds.length} of 3 selected</p>
-            <div className="mt-3 h-4 overflow-hidden rounded-full bg-white">
-              <div className="h-full rounded-full bg-gradient-to-r from-peach via-blush to-lavender transition-all" style={{ width: `${(selectedIds.length / 3) * 100}%` }} />
-            </div>
-            <div className="mt-5 grid gap-3">
-              {selectedProducts.length > 0 ? (
-                selectedProducts.map((product) => (
-                  <div key={product.id} className="flex items-center justify-between rounded-[20px] bg-white/70 px-4 py-3">
-                    <span className="font-black text-cocoa">{product.name}</span>
-                    <span className="font-bold text-caramel">{formatPrice(product.price)}</span>
-                  </div>
-                ))
-              ) : (
-                <p className="rounded-[20px] bg-white/70 px-4 py-4 text-sm font-bold text-charcoal/70">Your stack is waiting for its first scoop.</p>
-              )}
-            </div>
-            <dl className="mt-6 grid gap-2 text-sm font-bold text-charcoal/80">
-              <div className="flex justify-between">
-                <dt>Subtotal</dt>
-                <dd>{formatPrice(subtotal)}</dd>
+        <SectionHeading eyebrow="Prep & Care" title="Tan Prep & Care" copy="Good prep is the difference between a nice tan and a glow that looks expensive." />
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {[
+            ['Before Your Tan', prepChecklist],
+            ['Appointment Day', ['Arrive with clean, dry skin', 'No deodorant, perfume, oils, or moisturiser', 'Wear loose dark clothing', 'Bring slides or loose shoes']],
+            ['First Rinse', ['Follow your appointment instructions', 'Rinse with lukewarm water', 'Avoid soap during first rinse', 'Pat skin dry', 'Let colour continue developing']],
+            ['Aftercare', ['Moisturise daily', 'Avoid harsh exfoliation', 'Use gentle cleanser', 'Pat dry after showering', 'Use gradual glow products for maintenance']],
+            ['How to Extend Your Glow', ['Hydrate daily', 'Use Vanilla Veil for gradual glow', 'Use gentle cleanser', 'Avoid long hot baths', 'Pat skin dry']],
+            ['What to Avoid', ['Heavy oils before dressing', 'Sweating before first rinse', 'Tight clothing after application', 'Harsh scrubs on fresh tan', 'Skipping SPF outdoors']],
+          ].map(([title, items]) => (
+            <div key={title as string} className="soft-panel p-6">
+              <h3 className="font-display text-2xl font-semibold text-cocoa">{title as string}</h3>
+              <div className="mt-4 grid gap-2">
+                {(items as string[]).map((item) => <div key={item} className="check-row"><Check size={17} /> {item}</div>)}
               </div>
-              <div className="flex justify-between text-blush">
-                <dt>Bundle discount</dt>
-                <dd>-{formatPrice(discount)}</dd>
-              </div>
-              <div className="flex justify-between border-t border-caramel/15 pt-3 text-lg font-black text-cocoa">
-                <dt>Final price</dt>
-                <dd>{formatPrice(finalPrice)}</dd>
-              </div>
-            </dl>
-            <button className="primary-button mt-6 w-full justify-center disabled:cursor-not-allowed disabled:opacity-45" disabled={selectedIds.length !== 3} onClick={() => onAddBundle(selectedIds, 'Build Your Glow Stack', 0.15)}>
-              Add bundle to cart
-            </button>
-          </aside>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Routine({ onAdd }: { onAdd: (productId: string, quantity?: number) => void }) {
-  const [openStep, setOpenStep] = useState(0);
-
-  return (
-    <section id="routine" className="section-pad bg-gradient-to-br from-peach/18 via-vanilla to-lavender/18 px-4">
-      <div className="mx-auto max-w-7xl">
-        <div className="section-heading">
-          <h2>Your streak-free Sorbet Skin routine.</h2>
-          <p>Prep, apply, face, maintain, and extend. A beginner-friendly ritual that keeps glow clean, soft, and never orange.</p>
-        </div>
-        <div className="grid gap-4 lg:grid-cols-5">
-          {routineSteps.map((step, index) => {
-            const open = openStep === index;
-            const primaryProduct = productById(step.productIds[0]);
-            return (
-              <article key={step.title} className="rounded-[32px] border border-caramel/10 bg-white/70 p-5 shadow-soft">
-                <button className="flex w-full items-center justify-between gap-3 text-left" onClick={() => setOpenStep(open ? -1 : index)} aria-expanded={open}>
-                  <div>
-                    <span className="grid h-10 w-10 place-items-center rounded-full bg-cocoa text-sm font-black text-vanilla">{index + 1}</span>
-                    <h3 className="mt-4 font-display text-2xl font-black text-cocoa">{step.title}</h3>
-                  </div>
-                  <ChevronDown className={cx('transition', open && 'rotate-180')} />
-                </button>
-                <div className="mt-4">
-                  <ProductRender product={primaryProduct} size="sm" />
-                  <p className="mt-3 text-sm font-bold leading-6 text-charcoal/70">{step.copy}</p>
-                </div>
-                {open && (
-                  <div className="mt-4 rounded-[24px] bg-buttercream/70 p-4">
-                    <p className="text-sm font-black text-cocoa">Time: {step.time}</p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-charcoal/70">Pro tip: {step.tip}</p>
-                    <div className="mt-4 grid gap-2">
-                      {step.productIds.map((id) => {
-                        const product = productById(id);
-                        return (
-                          <button key={id} className="flex items-center justify-between rounded-full bg-white px-4 py-3 text-sm font-black text-cocoa transition hover:bg-peach/30" onClick={() => onAdd(id)}>
-                            {product.name}
-                            <Plus size={16} />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </article>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProSpray({
-  onAdd,
-  onGuideOpen,
-}: {
-  onAdd: (productId: string, quantity?: number) => void;
-  onGuideOpen: () => void;
-}) {
-  const product = productById('sorbet-pro-concentrate');
-
-  return (
-    <section id="pro" className="section-pad bg-cocoa px-4 text-vanilla">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="relative min-h-[440px] rounded-[40px] bg-gradient-to-br from-vanilla via-buttercream to-peach/70 p-8 shadow-gloss">
-          <div className="absolute inset-6 rounded-[34px] border border-white/60" />
-          <div className="relative flex h-full min-h-[380px] items-center justify-center">
-            <ProductRender product={product} size="hero" float />
-          </div>
-        </div>
-        <div>
-          <p className="inline-flex items-center gap-2 rounded-full bg-vanilla/12 px-4 py-2 text-sm font-black uppercase text-peach">
-            <SprayCan size={18} />
-            Professional
-          </p>
-          <h2 className="mt-5 font-display text-4xl font-black leading-none sm:text-6xl">Salon bronze, whipped into a pro concentrate.</h2>
-          <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-buttercream/85">
-            A vegan, cruelty-free, low-odour spray booth concentrate designed for trained spray tan professionals and salon systems.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {['Professional badge', 'Vegan', 'Cruelty-free', 'No fake tan smell', 'Transfer-resistant once rinsed'].map((badge) => (
-              <span key={badge} className="badge-pill border border-vanilla/18 bg-vanilla/10 text-vanilla">
-                <BadgeCheck size={14} />
-                {badge}
-              </span>
-            ))}
-          </div>
-          <div className="mt-6 grid gap-2 text-sm font-bold leading-6 text-buttercream/80">
-            <p>External use only.</p>
-            <p>Patch test before use.</p>
-            <p>Self-tan does not contain SPF. Wear SPF daily.</p>
-          </div>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <button className="primary-button bg-peach text-cocoa hover:bg-blush" onClick={() => onAdd(product.id)}>
-              Add to cart
-            </button>
-            <button className="secondary-button border-vanilla/30 bg-vanilla/10 text-vanilla hover:bg-vanilla/18" onClick={onGuideOpen}>
-              Application Guide
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function GuideModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose, open]);
-
-  if (!open) {
-    return null;
-  }
-
-  const steps = [
-    'Prep skin 24 hours before',
-    'Exfoliate old tan with Coconut Melt',
-    'Apply barrier cream to dry areas',
-    'Spray evenly using professional salon booth process',
-    'Let colour develop',
-    'Rinse as directed',
-    'Moisturise with Vanilla Veil',
-    'Finish with Honey Dew Oil to help maintain glow',
-  ];
-
-  return (
-    <div className="fixed inset-0 z-[85] flex items-center justify-center bg-cocoa/50 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="guide-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[36px] bg-vanilla p-5 shadow-gloss sm:p-8">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="section-kicker">Illustrated topical guide</p>
-            <h2 id="guide-title" className="font-display text-4xl font-black leading-none text-cocoa">
-              Sorbet Skin Spray Booth Application Guide
-            </h2>
-          </div>
-          <button className="icon-button bg-white" onClick={onClose} aria-label="Close application guide">
-            <X size={21} />
-          </button>
-        </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {steps.map((step, index) => (
-            <div key={step} className="rounded-[28px] bg-gradient-to-br from-white to-buttercream p-5 shadow-sm">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] bg-gradient-to-br from-peach to-blush text-2xl font-black text-cocoa">
-                {index + 1}
-              </div>
-              <h3 className="font-display text-2xl font-black text-cocoa">{step}</h3>
-              <p className="mt-2 text-sm font-semibold leading-6 text-charcoal/70">Topical spray tan use only. Follow salon equipment directions and keep skin comfort front and centre.</p>
             </div>
           ))}
         </div>
+
+        <div className="calculator-panel mt-8">
+          <div>
+            <p className="section-kicker">Downloadable Checklist</p>
+            <h3 className="font-display text-3xl font-semibold text-cocoa">Tan Timeline Builder</h3>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Field label="Event date"><TextInput type="date" value={eventDate} onChange={(event) => setEventDate(event.target.value)} /></Field>
+            <Field label="Service type"><SelectInput value={serviceType} onChange={(event) => setServiceType(event.target.value)}>{services.map((service) => <option key={service.id}>{service.name}</option>)}</SelectInput></Field>
+            <Field label="Skin dryness level"><SelectInput value={dryness} onChange={(event) => setDryness(event.target.value)}><option>Dry</option><option>Normal</option><option>Oily</option><option>Sensitive</option></SelectInput></Field>
+            <Field label="Desired colour"><SelectInput value={depth} onChange={(event) => setDepth(event.target.value)}><option>Subtle glow</option><option>Golden bronze</option><option>Deep bronze</option></SelectInput></Field>
+          </div>
+          <div className="timeline-output">
+            {date ? (
+              <>
+                <div><span>Prep date</span><strong>{formatDate(addDays(date, -2))}</strong></div>
+                <div><span>Shaving/waxing date</span><strong>{formatDate(addDays(date, -2))} to {formatDate(addDays(date, -1))}</strong></div>
+                <div><span>Appointment window</span><strong>{formatDate(addDays(date, -1))}</strong></div>
+                <div><span>First rinse reminder</span><strong>Follow your {serviceType} instructions</strong></div>
+              </>
+            ) : (
+              <p className="text-sm font-bold text-charcoal/70">Choose an event date to generate your prep date, shaving window, appointment window, first rinse reminder, and aftercare checklist.</p>
+            )}
+          </div>
+          <p className="text-sm font-bold text-charcoal/70">Skin dryness: {dryness}. Desired colour: {depth}. Moisturise daily after first rinse to help extend the look of your tan.</p>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-function BeforeAfterSlider() {
-  const [value, setValue] = useState(52);
+function BeforeAfterSection() {
+  const [position, setPosition] = useState(52);
+  const [tone, setTone] = useState(toneExamples[1]);
 
   return (
     <section className="section-pad bg-vanilla px-4">
-      <div className="mx-auto grid max-w-7xl items-center gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.82fr_1.18fr]">
         <div>
-          <p className="section-kicker">Glow reveal</p>
-          <h2 className="font-display text-4xl font-black leading-none text-cocoa sm:text-5xl">From soft neutral to golden bronze.</h2>
-          <p className="mt-4 text-lg font-semibold leading-8 text-charcoal/75">Drag the slider to reveal a warm self-tan finish using original gradient placeholders, not copied imagery.</p>
-        </div>
-        <div className="before-after">
-          <div className="before-layer" />
-          <div className="after-layer" style={{ clipPath: `inset(0 ${100 - value}% 0 0)` }} />
-          <span className="ba-label left-4">Before</span>
-          <span className="ba-label right-4">After</span>
-          <div className="ba-handle" style={{ left: `${value}%` }} />
-          <input className="ba-range" type="range" min="0" max="100" value={value} onChange={(event) => setValue(Number(event.target.value))} aria-label="Before and after reveal amount" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function IngredientLab() {
-  const ingredientNames = Object.keys(ingredientInfo);
-  const [selected, setSelected] = useState(ingredientNames[0]);
-
-  return (
-    <section id="ingredients" className="section-pad bg-gradient-to-br from-buttercream via-vanilla to-peach/20 px-4">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_0.85fr]">
-        <div>
-          <p className="section-kicker">Ingredient Lab</p>
-          <h2 className="font-display text-4xl font-black leading-none text-cocoa sm:text-5xl">Naturally derived hero ingredients, explained softly.</h2>
-          <div className="mt-7 flex flex-wrap gap-2">
-            {ingredientNames.map((ingredient) => (
-              <button key={ingredient} className={cx('ingredient-chip', selected === ingredient && 'ingredient-chip-active')} onClick={() => setSelected(ingredient)}>
-                {ingredient}
+          <p className="section-kicker">Before and after</p>
+          <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">A soft-focus glow comparison.</h2>
+          <p className="mt-5 text-lg font-medium leading-8 text-charcoal/75">Consent-safe generated skin-tone gradients show colour direction without using real client photos.</p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {toneExamples.map((example) => (
+              <button key={example.name} className={cx('filter-chip', tone.name === example.name && 'filter-chip-active')} onClick={() => setTone(example)}>
+                {example.name}
               </button>
             ))}
           </div>
+          <p className="mt-5 text-sm font-bold text-charcoal/70">Results vary based on skin tone, prep, application, and aftercare.</p>
         </div>
-        <div className="rounded-[38px] bg-white/80 p-7 shadow-gloss">
-          <div className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-[24px] bg-gradient-to-br from-mint to-lavender text-cocoa">
-            <Leaf size={30} />
-          </div>
-          <h3 className="font-display text-4xl font-black text-cocoa">{selected}</h3>
-          <p className="mt-4 text-lg font-semibold leading-8 text-charcoal/75">{ingredientInfo[selected]}</p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Reviews() {
-  const [index, setIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const active = reviews[index];
-
-  const go = (direction: number) => {
-    setIndex((current) => (current + direction + reviews.length) % reviews.length);
-  };
-
-  return (
-    <section id="reviews" className="section-pad bg-vanilla px-4">
-      <div className="mx-auto max-w-5xl">
-        <div className="section-heading">
-          <h2>Glow notes from the Sorbet shelf.</h2>
-          <p>Mock reviews for a brand-ready demo experience, with tone and proof points aligned to the range.</p>
-        </div>
-        <div
-          className="rounded-[40px] bg-gradient-to-br from-white via-buttercream to-blush/18 p-6 shadow-gloss sm:p-10"
-          onTouchStart={(event) => setTouchStart(event.touches[0].clientX)}
-          onTouchEnd={(event) => {
-            if (touchStart === null) {
-              return;
-            }
-            const diff = touchStart - event.changedTouches[0].clientX;
-            if (Math.abs(diff) > 35) {
-              go(diff > 0 ? 1 : -1);
-            }
-            setTouchStart(null);
-          }}
-        >
-          <div className="flex items-center justify-between gap-4">
-            <Rating value={5} />
-            <span className="rounded-full bg-cocoa px-4 py-2 text-sm font-black text-vanilla">Before and after badge</span>
-          </div>
-          <blockquote className="mt-8 font-display text-3xl font-black leading-tight text-cocoa sm:text-5xl">"{active.text}"</blockquote>
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xl font-black text-cocoa">{active.name}</p>
-              <p className="font-bold text-caramel">
-                {active.skinTone} skin tone / {active.product}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button className="icon-button bg-white" onClick={() => go(-1)} aria-label="Previous review">
-                <ArrowLeft size={20} />
-              </button>
-              <button className="icon-button bg-white" onClick={() => go(1)} aria-label="Next review">
-                <ArrowRight size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FAQ() {
-  const [open, setOpen] = useState(0);
-
-  return (
-    <section id="faq" className="section-pad bg-gradient-to-br from-mint/40 via-vanilla to-buttercream px-4">
-      <div className="mx-auto max-w-4xl">
-        <div className="section-heading">
-          <h2>Glow questions, answered cleanly.</h2>
-          <p>Clear beauty copy with careful claims, practical use guidance, and no sun-worship energy.</p>
-        </div>
-        <div className="grid gap-3">
-          {faqs.map(([question, answer], index) => (
-            <div key={question} className="rounded-[28px] border border-caramel/10 bg-white/75 shadow-sm">
-              <button className="flex w-full items-center justify-between gap-4 p-5 text-left" onClick={() => setOpen(open === index ? -1 : index)} aria-expanded={open === index}>
-                <span className="font-display text-xl font-black text-cocoa">{question}</span>
-                <ChevronDown className={cx('shrink-0 transition', open === index && 'rotate-180')} />
-              </button>
-              {open === index && <p className="px-5 pb-5 text-sm font-semibold leading-6 text-charcoal/75">{answer}</p>}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Newsletter() {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  return (
-    <section className="bg-cocoa px-4 py-14 text-vanilla">
-      <div className="mx-auto grid max-w-5xl items-center gap-6 rounded-[38px] bg-vanilla/10 p-6 shadow-gloss sm:p-8 lg:grid-cols-[1fr_0.9fr]">
         <div>
-          <h2 className="font-display text-4xl font-black">Join the glow club.</h2>
-          <p className="mt-3 text-lg font-semibold leading-8 text-buttercream/80">Get restock alerts, glow tips, routine guides, and first dibs on limited Sorbet Skin drops.</p>
+          <div className="before-after" style={{ '--before-tone': tone.before, '--after-tone': tone.after, '--split': `${position}%` } as CSSProperties}>
+            <div className="before-layer" />
+            <div className="after-layer" />
+            <span className="ba-label left-4">Before</span>
+            <span className="ba-label right-4">After</span>
+            <div className="ba-handle" />
+          </div>
+          <input className="mt-5 w-full accent-cocoa" type="range" min="15" max="85" value={position} onChange={(event) => setPosition(Number(event.target.value))} aria-label="Drag before and after comparison slider" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ReviewsSection() {
+  const [index, setIndex] = useState(0);
+  const review = reviews[index];
+  const next = () => setIndex((current) => (current + 1) % reviews.length);
+  const prev = () => setIndex((current) => (current - 1 + reviews.length) % reviews.length);
+
+  return (
+    <section id="reviews" className="section-pad bg-gradient-to-br from-buttercream via-vanilla to-peach/20 px-4">
+      <div className="mx-auto max-w-5xl text-center">
+        <p className="section-kicker">Reviews</p>
+        <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Five-star glow notes.</h2>
+        <div className="review-card mt-8">
+          <div className="mx-auto flex w-fit items-center gap-2 rounded-full bg-white/75 px-4 py-2 text-sm font-black text-cocoa"><BadgeCheck size={17} /> Verified glow</div>
+          <div className="mt-5 flex justify-center"><Rating value={5} /></div>
+          <p className="mt-6 text-2xl font-medium leading-9 text-charcoal/80">"{review.text}"</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <span className="mini-chip">{review.serviceProduct}</span>
+            <span className="mini-chip">Skin tone: {review.skinTone}</span>
+            <span className="mini-chip">{review.eventType}</span>
+          </div>
+          <p className="mt-5 font-display text-2xl font-semibold text-cocoa">{review.name}</p>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <button className="icon-button bg-buttercream" onClick={prev} aria-label="Previous review"><ChevronLeft size={20} /></button>
+            <div className="flex gap-2">
+              {reviews.map((item, itemIndex) => <button key={item.name} className={cx('h-2.5 rounded-full transition-all', index === itemIndex ? 'w-8 bg-cocoa' : 'w-2.5 bg-caramel/30')} onClick={() => setIndex(itemIndex)} aria-label={`Show review ${itemIndex + 1}`} />)}
+            </div>
+            <button className="icon-button bg-buttercream" onClick={next} aria-label="Next review"><ChevronRight size={20} /></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LocationContactSection() {
+  const [submitted, setSubmitted] = useState(false);
+  return (
+    <section id="contact" className="section-pad bg-warmwhite px-4">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading eyebrow="Location & contact" title="Melbourne studio location" copy="Appointment-only tanning with mobile service enquiries available by request." />
+        <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
+          <div className="soft-panel p-6">
+            <div className="map-placeholder studio-map">
+              <span>Melbourne studio location</span>
+              <i className="pin pin-two" />
+            </div>
+            <div className="mt-6 grid gap-3 text-sm font-bold text-charcoal/75">
+              <div className="check-row"><MapPin size={17} /> Melbourne studio location</div>
+              <div className="check-row"><Clock size={17} /> Monday to Sunday: 9:30am to 8:00pm</div>
+              <div className="check-row"><CalendarDays size={17} /> Appointments outside standard hours available by request.</div>
+              <div className="check-row"><Mail size={17} /> hello@sorbetskin.example</div>
+              <div className="check-row"><Phone size={17} /> 0400 000 000</div>
+              <div className="check-row"><Instagram size={17} /> @sorbetskin</div>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button className="primary-button min-h-11 px-5 py-2 text-sm">Directions</button>
+              <button className="secondary-button min-h-11 px-5 py-2 text-sm" onClick={() => scrollToId('mobile')}>Mobile service enquiry</button>
+            </div>
+          </div>
+
+          <form
+            className="form-panel"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setSubmitted(true);
+            }}
+          >
+            <div>
+              <p className="section-kicker">Contact form</p>
+              <h3 className="font-display text-3xl font-semibold text-cocoa">Ask us anything glow-related.</h3>
+            </div>
+            <Field label="Name"><TextInput required /></Field>
+            <Field label="Email"><TextInput type="email" required /></Field>
+            <Field label="Message"><TextArea placeholder="Event date, service, product question, or mobile enquiry..." /></Field>
+            {submitted ? <p className="success-message">Thanks. Your message has been received.</p> : <button className="primary-button w-fit">Send Message</button>}
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GiftCertificates({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void }) {
+  const [selected, setSelected] = useState(giftOptions[0].id);
+  const [custom, setCustom] = useState(75);
+  const [recipient, setRecipient] = useState('');
+  const [sender, setSender] = useState('');
+  const option = giftOptions.find((giftOption) => giftOption.id === selected) ?? giftOptions[0];
+  const price = option.id === 'gift-custom' ? custom : option.price;
+
+  return (
+    <section id="gifts" className="section-pad bg-vanilla px-4">
+      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+        <div>
+          <p className="section-kicker">Gift certificates</p>
+          <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Give a glow that books itself.</h2>
+          <p className="mt-5 text-lg font-medium leading-8 text-charcoal/75">Choose a value, write the message, and add a mock digital gift certificate to cart.</p>
         </div>
         <form
-          className="flex flex-col gap-3 sm:flex-row"
+          className="form-panel"
           onSubmit={(event) => {
             event.preventDefault();
-            if (email.trim()) {
-              setSubmitted(true);
-            }
+            onAdd({
+              key: `gift:${selected}:${recipient}:${sender}:${price}`,
+              kind: 'gift',
+              name: option.name,
+              price,
+              meta: `To ${recipient || 'recipient'} from ${sender || 'sender'}`,
+              accent: '#FF8FBC',
+            });
           }}
         >
-          <label className="sr-only" htmlFor="newsletter-email">
-            Email address
-          </label>
-          <input id="newsletter-email" className="min-h-14 flex-1 rounded-full border border-vanilla/20 bg-vanilla px-5 font-bold text-cocoa outline-none placeholder:text-caramel/70 focus:border-blush" type="email" placeholder="Email address" value={email} onChange={(event) => setEmail(event.target.value)} required />
-          <button className="primary-button justify-center bg-peach text-cocoa hover:bg-blush" type="submit">
-            Get glowing
-          </button>
-          {submitted && <p className="sm:col-span-2 rounded-full bg-mint px-4 py-3 text-sm font-black text-cocoa">You're in. Your glow routine just got an upgrade.</p>}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Gift value"><SelectInput value={selected} onChange={(event) => setSelected(event.target.value)}>{giftOptions.map((giftOption) => <option key={giftOption.id} value={giftOption.id}>{giftOption.name}</option>)}</SelectInput></Field>
+            {selected === 'gift-custom' && <Field label="Custom amount"><TextInput type="number" min="25" value={custom} onChange={(event) => setCustom(Number(event.target.value))} /></Field>}
+            <Field label="Recipient name"><TextInput value={recipient} onChange={(event) => setRecipient(event.target.value)} required /></Field>
+            <Field label="Sender name"><TextInput value={sender} onChange={(event) => setSender(event.target.value)} required /></Field>
+            <Field label="Delivery method"><SelectInput><option>Email certificate</option><option>Print-ready PDF</option><option>Send later</option></SelectInput></Field>
+            <Field label="Message"><TextInput placeholder="A soft glow for your next big moment." /></Field>
+          </div>
+          <div className="quote-output">
+            <div>
+              <span>Selected gift</span>
+              <strong>{formatPrice(price)}</strong>
+              <p>{option.name}</p>
+            </div>
+            <button className="primary-button"><Gift size={20} /> Add Gift Certificate</button>
+          </div>
         </form>
       </div>
     </section>
   );
 }
 
-function CartDrawer({
-  open,
-  items,
-  onClose,
-  onUpdate,
-  onRemove,
-  onAdd,
-}: {
-  open: boolean;
-  items: CartItem[];
-  onClose: () => void;
-  onUpdate: (key: string, quantity: number) => void;
-  onRemove: (key: string) => void;
-  onAdd: (productId: string, quantity?: number) => void;
-}) {
-  const totals = useMemo(() => {
-    return items.reduce(
-      (summary, item) => {
-        const product = productById(item.productId);
-        const lineSubtotal = product.price * item.quantity;
-        const lineDiscount = lineSubtotal * (item.discountRate ?? 0);
-        summary.subtotal += lineSubtotal;
-        summary.discount += lineDiscount;
-        summary.total += lineSubtotal - lineDiscount;
-        summary.count += item.quantity;
-        return summary;
-      },
-      { subtotal: 0, discount: 0, total: 0, count: 0 },
-    );
-  }, [items]);
+function FAQSection() {
+  const [open, setOpen] = useState(0);
+  return (
+    <section id="faq" className="section-pad bg-warmwhite px-4">
+      <div className="mx-auto max-w-5xl">
+        <SectionHeading eyebrow="FAQ" title="Glow questions, answered." copy="Product pages, service pages, FAQ, and footer all include SPF and safety guidance." />
+        <div className="grid gap-3">
+          {faqs.map((faq, index) => (
+            <div key={faq.question} className="faq-item">
+              <button className="faq-button" onClick={() => setOpen(open === index ? -1 : index)} aria-expanded={open === index}>
+                {faq.question}
+                <ChevronDown className={cx('transition', open === index && 'rotate-180')} size={20} />
+              </button>
+              {open === index && <p className="px-5 pb-5 text-sm font-medium leading-7 text-charcoal/70">{faq.answer}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-  const away = Math.max(0, 80 - totals.total);
-  const progress = Math.min(100, (totals.total / 80) * 100);
-  const hasOil = items.some((item) => item.productId === 'honey-dew-oil');
+function NewsletterSection() {
+  const [success, setSuccess] = useState(false);
+  return (
+    <section className="bg-cocoa px-4 py-16 text-vanilla">
+      <div className="mx-auto grid max-w-6xl items-center gap-6 md:grid-cols-[0.9fr_1.1fr]">
+        <div>
+          <h2 className="font-display text-4xl font-semibold leading-none sm:text-5xl">Join the glow club.</h2>
+          <p className="mt-4 text-base font-medium leading-7 text-vanilla/80">Get appointment reminders, glow tips, product drops, bridal timelines, and prep checklists.</p>
+        </div>
+        <form
+          className="flex flex-col gap-3 rounded-[28px] bg-white/12 p-3 sm:flex-row"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSuccess(true);
+          }}
+        >
+          <input className="min-h-14 flex-1 rounded-full border border-white/20 bg-white/90 px-5 font-bold text-cocoa outline-none" type="email" placeholder="Email address" required />
+          <button className="rounded-full bg-peach px-6 py-3 font-black text-cocoa transition hover:-translate-y-0.5 hover:bg-blush">Get glowing</button>
+        </form>
+        {success && <p className="md:col-start-2 rounded-full bg-white/12 px-5 py-3 text-sm font-black text-vanilla">You're in. Your glow routine just got an upgrade.</p>}
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  const columns = [
+    ['Book', ['Book Now', 'Studio Tanning', 'Mobile Tanning', 'Competition Bronze']],
+    ['Services', ['Signature Studio Tan', 'Express Glow Tan', 'Bridal Glow', 'Group Bookings']],
+    ['Shop', ['Peach Glaze', 'Caramel Cloud', 'Cocoa Drip', 'Velvet Mitt']],
+    ['Learn', ['Prep & Care', 'Glow Quiz', 'FAQ', 'Before & After']],
+    ['Customer Care', ['Contact', 'Gift Certificates', 'Shipping', 'Returns']],
+    ['Social', ['Instagram', 'TikTok', 'Pinterest', 'Reviews']],
+  ];
+  return (
+    <footer className="bg-vanilla px-4 py-12">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_2fr]">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="brand-mark">SS</span>
+              <div>
+                <p className="font-display text-3xl font-semibold leading-none text-cocoa">Sorbet Skin</p>
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-caramel">Whipped glow, zero sun damage.</p>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {['Vegan', 'Cruelty-free', 'No fake tan smell'].map((badge) => <span key={badge} className="badge-pill bg-white/80 text-cocoa">{badge}</span>)}
+            </div>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
+            {columns.map(([title, links]) => (
+              <div key={title as string}>
+                <h3 className="footer-title">{title as string}</h3>
+                {(links as string[]).map((link) => <button key={link} className="footer-link">{link}</button>)}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-10 rounded-[28px] bg-white/70 p-5 text-xs font-bold leading-6 text-charcoal/70">
+          <p>Sorbet Skin self-tan products do not contain SPF and do not protect against UV exposure. Wear SPF daily. External use only. Patch test before use. Claims such as vegan, cruelty-free, transfer-resistant, naturally derived, and no fake tan smell should be verified through formulation testing and certification before commercial launch.</p>
+          <p className="mt-3">External use only. Patch test before use. Avoid eyes and broken skin. Stop use if irritation occurs.</p>
+          <p className="mt-3">Copyright 2026 Sorbet Skin. Original mock brand and website concept.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function BookingModal({ service, open, onClose }: { service?: Service; open: boolean; onClose: () => void }) {
+  const [selectedService, setSelectedService] = useState(service?.name ?? services[0].name);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedService(service?.name ?? services[0].name);
+      setSuccess(false);
+    }
+  }, [open, service]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose, open]);
+
+  if (!open) return null;
 
   return (
-    <div className={cx('fixed inset-0 z-[90] transition', open ? 'pointer-events-auto' : 'pointer-events-none')} aria-hidden={!open}>
-      <div className={cx('absolute inset-0 bg-cocoa/45 backdrop-blur-sm transition-opacity', open ? 'opacity-100' : 'opacity-0')} onClick={onClose} />
-      <aside className={cx('absolute right-0 top-0 flex h-full w-full max-w-md flex-col rounded-l-[34px] bg-vanilla shadow-gloss transition-transform duration-300', open ? 'translate-x-0' : 'translate-x-full')}>
-        <div className="flex items-start justify-between border-b border-caramel/10 p-5">
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="booking-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <div className="modal-card max-w-4xl p-5 sm:p-8">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="section-kicker">Cart</p>
-            <h2 className="font-display text-3xl font-black text-cocoa">Your glow stack</h2>
+            <p className="section-kicker">Mock booking</p>
+            <h2 id="booking-title" className="font-display text-4xl font-semibold leading-none text-cocoa">Choose Your Glow Appointment</h2>
           </div>
-          <button className="icon-button bg-white" onClick={onClose} aria-label="Close cart">
-            <X size={21} />
-          </button>
+          <button className="icon-button bg-white" onClick={onClose} aria-label="Close booking modal"><X size={21} /></button>
         </div>
 
+        {success ? (
+          <div className="mt-8 rounded-[28px] bg-mint/45 p-6">
+            <h3 className="font-display text-3xl font-semibold text-cocoa">Your glow request has been received.</h3>
+            <p className="mt-3 text-sm font-bold leading-7 text-charcoal/75">We will confirm your appointment shortly.</p>
+          </div>
+        ) : (
+          <form
+            className="mt-6 grid gap-4"
+            onSubmit={(event: FormEvent) => {
+              event.preventDefault();
+              setSuccess(true);
+            }}
+          >
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Field label="Name"><TextInput required /></Field>
+              <Field label="Email"><TextInput type="email" required /></Field>
+              <Field label="Phone"><TextInput type="tel" required /></Field>
+              <Field label="Service"><SelectInput value={selectedService} onChange={(event) => setSelectedService(event.target.value)}>{services.map((item) => <option key={item.id}>{item.name}</option>)}</SelectInput></Field>
+              <Field label="Preferred date"><TextInput type="date" required /></Field>
+              <Field label="Preferred time"><TextInput type="time" required /></Field>
+              <Field label="Studio or mobile"><SelectInput><option>Studio</option><option>Mobile</option></SelectInput></Field>
+              <Field label="Event date"><TextInput type="date" /></Field>
+              <Field label="Skin tone"><SelectInput><option>Fair</option><option>Light</option><option>Medium</option><option>Olive</option><option>Deep</option></SelectInput></Field>
+              <Field label="Desired colour depth"><SelectInput><option>Subtle glow</option><option>Golden bronze</option><option>Deep bronze</option><option>Competition bronze</option></SelectInput></Field>
+            </div>
+            <Field label="Notes"><TextArea placeholder="Event type, rinse timing, allergies, mobile setup notes..." /></Field>
+            <p className="text-xs font-bold leading-6 text-charcoal/70">{spfDisclaimer} External use only. Patch test before use.</p>
+            <button className="primary-button w-fit">Submit Glow Request</button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, onCheckout }: { open: boolean; items: CartItem[]; onClose: () => void; onUpdate: (key: string, quantity: number) => void; onRemove: (key: string) => void; onAddProduct: (product: Product) => void; onCheckout: () => void }) {
+  if (!open) return null;
+
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const progress = Math.min(100, (subtotal / 80) * 100);
+  const upsells = ['velvet-mitt', 'coconut-melt', 'vanilla-veil', 'champagne-blur'].map(productById);
+
+  return (
+    <div className={cx('cart-overlay', open && 'cart-overlay-open')} aria-hidden={!open}>
+      <div className="cart-scrim" onClick={onClose} />
+      <aside className={cx('cart-drawer', open && 'cart-drawer-open')} aria-label="Cart drawer">
+        <div className="flex items-start justify-between gap-4 border-b border-caramel/10 p-5">
+          <div>
+            <p className="section-kicker">Your cart</p>
+            <h2 className="font-display text-3xl font-semibold text-cocoa">Glow bag</h2>
+          </div>
+          <button className="icon-button bg-buttercream" onClick={onClose} aria-label="Close cart"><X size={21} /></button>
+        </div>
         <div className="flex-1 overflow-y-auto p-5">
-          <div className="mb-5 rounded-[24px] bg-buttercream p-4">
-            <div className="mb-2 h-3 overflow-hidden rounded-full bg-white">
-              <div className="h-full rounded-full bg-gradient-to-r from-peach to-blush" style={{ width: `${progress}%` }} />
+          {items.length === 0 ? (
+            <div className="rounded-[28px] bg-buttercream/70 p-6 text-center">
+              <ShoppingBag className="mx-auto text-caramel" />
+              <p className="mt-3 font-bold text-charcoal/70">Your glow bag is empty.</p>
             </div>
-            <p className="text-sm font-black text-cocoa">{away > 0 ? `You're ${formatPrice(away)} away from free shipping.` : 'Free shipping unlocked.'}</p>
+          ) : (
+            <div className="grid gap-3">
+              {items.map((item) => (
+                <div key={item.key} className="cart-line">
+                  <div className="cart-line-icon" style={{ backgroundColor: item.accent ?? '#FFF3DD' }}><PackageCheck size={18} /></div>
+                  <div className="min-w-0 flex-1">
+                    <h3>{item.name}</h3>
+                    {item.meta && <p>{item.meta}</p>}
+                    <span>{formatPrice(item.price)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button className="quantity-button" onClick={() => onUpdate(item.key, Math.max(1, item.quantity - 1))} aria-label={`Decrease ${item.name}`}><Minus size={15} /></button>
+                    <span className="w-5 text-center text-sm font-black text-cocoa">{item.quantity}</span>
+                    <button className="quantity-button" onClick={() => onUpdate(item.key, item.quantity + 1)} aria-label={`Increase ${item.name}`}><Plus size={15} /></button>
+                  </div>
+                  <button className="icon-button h-9 w-9 bg-white" onClick={() => onRemove(item.key)} aria-label={`Remove ${item.name}`}><Trash2 size={16} /></button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-6 rounded-[24px] bg-white/75 p-4">
+            <div className="flex justify-between text-sm font-black text-cocoa"><span>Free shipping progress</span><span>{subtotal >= 80 ? 'Unlocked' : `${formatPrice(80 - subtotal)} to go`}</span></div>
+            <div className="mt-3 h-3 overflow-hidden rounded-full bg-buttercream"><div className="h-full rounded-full bg-gradient-to-r from-peach via-blush to-lavender" style={{ width: `${progress}%` }} /></div>
           </div>
 
-          {items.length === 0 ? (
-            <p className="rounded-[28px] bg-white p-5 text-sm font-bold text-charcoal/70">Your cart is soft and empty. Add a foam, drops, or a glow stack to start.</p>
-          ) : (
-            <div className="grid gap-4">
-              {items.map((item) => {
-                const product = productById(item.productId);
-                return (
-                  <div key={item.key} className="rounded-[28px] bg-white p-4 shadow-sm">
-                    <div className="flex gap-4">
-                      <ProductRender product={product} size="sm" />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-display text-xl font-black text-cocoa">{product.name}</h3>
-                        <p className="text-sm font-bold text-caramel">{formatPrice(product.price)}</p>
-                        {item.bundleName && <p className="mt-1 text-xs font-black uppercase text-blush">{item.bundleName}</p>}
-                        <div className="mt-3 flex items-center gap-2">
-                          <button className="quantity-button" onClick={() => onUpdate(item.key, item.quantity - 1)} aria-label={`Decrease ${product.name} quantity`}>
-                            <Minus size={15} />
-                          </button>
-                          <span className="w-8 text-center font-black text-cocoa">{item.quantity}</span>
-                          <button className="quantity-button" onClick={() => onUpdate(item.key, item.quantity + 1)} aria-label={`Increase ${product.name} quantity`}>
-                            <Plus size={15} />
-                          </button>
-                          <button className="quantity-button ml-auto text-blush" onClick={() => onRemove(item.key)} aria-label={`Remove ${product.name}`}>
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+          <div className="mt-6">
+            <h3 className="text-sm font-black uppercase tracking-[0.08em] text-cocoa">Suggested upsells</h3>
+            <div className="mt-3 grid gap-3">
+              {upsells.map((product) => (
+                <button key={product.id} className="upsell-row" onClick={() => onAddProduct(product)}>
+                  <ProductRender product={product} size="xs" />
+                  <span>{product.name}</span>
+                  <strong>{formatPrice(product.price)}</strong>
+                </button>
+              ))}
             </div>
-          )}
-
-          {!hasOil && (
-            <div className="mt-5 rounded-[28px] bg-gradient-to-br from-honey/22 to-peach/20 p-5">
-              <h3 className="font-display text-2xl font-black text-cocoa">Add Honey Dew Oil to help extend your glow.</h3>
-              <button className="small-button mt-4 bg-cocoa text-vanilla" onClick={() => onAdd('honey-dew-oil')}>
-                Add Honey Dew Oil
-              </button>
-            </div>
-          )}
+          </div>
         </div>
-
         <div className="border-t border-caramel/10 p-5">
-          <dl className="grid gap-2 text-sm font-bold text-charcoal/75">
-            <div className="flex justify-between">
-              <dt>Subtotal</dt>
-              <dd>{formatPrice(totals.subtotal)}</dd>
-            </div>
-            {totals.discount > 0 && (
-              <div className="flex justify-between text-blush">
-                <dt>Bundle discount</dt>
-                <dd>-{formatPrice(totals.discount)}</dd>
-              </div>
-            )}
-            <div className="flex justify-between border-t border-caramel/15 pt-3 text-xl font-black text-cocoa">
-              <dt>Total</dt>
-              <dd>{formatPrice(totals.total)}</dd>
-            </div>
-          </dl>
-          <button className="primary-button mt-5 w-full justify-center">Checkout</button>
-          <p className="mt-3 text-center text-xs font-bold text-charcoal/60">Mock checkout for demo purposes.</p>
+          <div className="flex items-center justify-between text-lg font-black text-cocoa"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+          <button className="primary-button mt-4 w-full justify-center" onClick={onCheckout}>Mock checkout</button>
         </div>
       </aside>
     </div>
   );
 }
 
-function Toast({ message }: { message: string | null }) {
-  return (
-    <div className={cx('fixed bottom-5 left-1/2 z-[100] -translate-x-1/2 rounded-full bg-cocoa px-5 py-3 text-sm font-black text-vanilla shadow-gloss transition', message ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0')}>
-      {message}
-    </div>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="bg-vanilla px-4 py-12">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1.2fr]">
-        <div>
-          <h2 className="font-display text-4xl font-black text-cocoa">Sorbet Skin</h2>
-          <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-charcoal/70">Playful, premium, dessert-soft self-tanning bodycare for whipped glow without UV damage.</p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {['Cruelty-free', 'Vegan', 'No fake tan smell'].map((badge) => (
-              <span key={badge} className="mini-chip bg-buttercream">
-                {badge}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div>
-          <h3 className="footer-title">Shop</h3>
-          {['Foaming Tan', 'Face Drops', 'Body Blur', 'Tan Prep', 'Pro Spray'].map((link) => (
-            <a key={link} className="footer-link" href="#shop">
-              {link}
-            </a>
-          ))}
-        </div>
-        <div>
-          <h3 className="footer-title">Help</h3>
-          {['Glow Quiz', 'Routine', 'Ingredients', 'Reviews', 'FAQ'].map((link) => (
-            <a key={link} className="footer-link" href={`#${slug(link === 'Glow Quiz' ? 'quiz' : link)}`}>
-              {link}
-            </a>
-          ))}
-        </div>
-        <div>
-          <h3 className="footer-title">Social</h3>
-          <div className="mb-5 flex flex-wrap gap-2">
-            {['TikTok', 'Instagram', 'Pinterest'].map((link) => (
-              <a key={link} className="filter-chip bg-white" href="#top">
-                {link}
-              </a>
-            ))}
-          </div>
-          <p className="text-xs font-semibold leading-5 text-charcoal/66">
-            Sorbet Skin self-tan products do not contain SPF and do not protect against UV exposure. Wear SPF daily. External use only. Patch test before use. Claims such as vegan, cruelty-free, transfer-resistant, naturally derived, and no fake tan smell should be verified through formulation testing and certification before commercial launch. Claim subject to formulation testing and certification.
-          </p>
-        </div>
-      </div>
-      <p className="mx-auto mt-10 max-w-7xl border-t border-caramel/10 pt-6 text-xs font-bold text-charcoal/60">Copyright 2026 Sorbet Skin. Original concept demo.</p>
-    </footer>
-  );
+function Toast({ message }: { message: string }) {
+  return <div className="toast"><Sparkles size={18} /> {message}</div>;
 }
 
 export default function App() {
-  const [cartOpen, setCartOpen] = useState(false);
-  const [quickProduct, setQuickProduct] = useState<Product | null>(null);
-  const [guideOpen, setGuideOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
-      const saved = window.localStorage.getItem(cartStorageKey);
-      return saved ? (JSON.parse(saved) as CartItem[]) : [];
+      const stored = localStorage.getItem(cartStorageKey);
+      return stored ? (JSON.parse(stored) as CartItem[]) : [];
     } catch {
       return [];
     }
   });
+  const [cartOpen, setCartOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingService, setBookingService] = useState<Service | undefined>();
+  const [toast, setToast] = useState('');
 
   useEffect(() => {
-    window.localStorage.setItem(cartStorageKey, JSON.stringify(cart));
+    localStorage.setItem(cartStorageKey, JSON.stringify(cart));
   }, [cart]);
 
   useEffect(() => {
-    if (!toast) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => setToast(null), 2500);
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(''), 2600);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  const addToCart = (productId: string, quantity = 1) => {
-    const product = productById(productId);
+  const addLine = (item: Omit<CartItem, 'quantity'>, quantity = 1) => {
     setCart((current) => {
-      const existing = current.find((item) => item.key === productId);
+      const existing = current.find((line) => line.key === item.key);
       if (existing) {
-        return current.map((item) => (item.key === productId ? { ...item, quantity: item.quantity + quantity } : item));
+        return current.map((line) => (line.key === item.key ? { ...line, quantity: line.quantity + quantity } : line));
       }
-
-      return [...current, { key: productId, productId, quantity }];
+      return [...current, { ...item, quantity }];
     });
-    setToast(`${product.name} added to your glow stack.`);
+    setToast(`${item.name} added to cart.`);
   };
 
-  const addBundle = (ids: string[], name: string, discountRate = 0.15) => {
-    const bundleKey = `bundle-${slug(name)}-${Date.now()}`;
-    setCart((current) => [
-      ...current,
-      ...ids.map((id) => ({
-        key: `${bundleKey}-${id}`,
-        productId: id,
-        quantity: 1,
-        bundleName: name,
-        discountRate,
-      })),
-    ]);
-    setToast(`${name} added with 15 percent off.`);
-    setCartOpen(true);
+  const addProduct = (product: Product, quantity = 1) => {
+    addLine(
+      {
+        key: `product:${product.id}`,
+        kind: 'product',
+        name: product.name,
+        price: product.price,
+        meta: product.type,
+        accent: product.themeHex,
+      },
+      quantity,
+    );
   };
 
-  const updateQuantity = (key: string, quantity: number) => {
-    setCart((current) => current.flatMap((item) => (item.key === key ? (quantity <= 0 ? [] : [{ ...item, quantity }]) : [item])));
+  const addProducts = (ids: string[]) => {
+    ids.map(productById).forEach((product) => addProduct(product));
+    setToast('Your product routine was added to cart.');
   };
 
-  const removeItem = (key: string) => {
-    setCart((current) => current.filter((item) => item.key !== key));
+  const openBooking = (service?: Service) => {
+    setBookingService(service);
+    setBookingOpen(true);
   };
+
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="min-h-screen bg-vanilla font-body text-charcoal">
       <div className="sticky top-0 z-50">
         <AnnouncementBar />
-        <Header cartCount={cartCount} onCartOpen={() => setCartOpen(true)} />
+        <Header cartCount={cartCount} onCartOpen={() => setCartOpen(true)} onBook={() => openBooking()} />
       </div>
+
       <main>
-        <Hero onQuickStart={() => document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' })} />
-        <TrustStrip />
-        <ProductRange onAdd={addToCart} onQuickView={setQuickProduct} />
-        <GlowQuiz onAddBundle={addBundle} onQuickView={setQuickProduct} />
-        <BundleBuilder onAddBundle={addBundle} />
-        <Routine onAdd={addToCart} />
-        <ProSpray onAdd={addToCart} onGuideOpen={() => setGuideOpen(true)} />
-        <BeforeAfterSlider />
-        <IngredientLab />
-        <Reviews />
-        <FAQ />
-        <Newsletter />
+        <Hero onBook={() => openBooking()} />
+        <SocialProofStrip />
+        <BookingPanel onBook={openBooking} />
+        <ServicesPage onBook={openBooking} />
+        <PackagesSection onAdd={addLine} />
+        <BridalPage onBook={openBooking} />
+        <MobileTanningPage onBook={openBooking} />
+        <CompetitionPage />
+        <ShopPage onAdd={addProduct} onQuickView={setQuickViewProduct} />
+        <GlowQuiz onBook={openBooking} onAddProducts={addProducts} />
+        <PrepCarePage />
+        <BeforeAfterSection />
+        <ReviewsSection />
+        <LocationContactSection />
+        <GiftCertificates onAdd={addLine} />
+        <FAQSection />
+        <NewsletterSection />
       </main>
+
       <Footer />
-      <QuickViewModal product={quickProduct} onClose={() => setQuickProduct(null)} onAdd={addToCart} />
-      <GuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
-      <CartDrawer open={cartOpen} items={cart} onClose={() => setCartOpen(false)} onUpdate={updateQuantity} onRemove={removeItem} onAdd={addToCart} />
-      <Toast message={toast} />
+
+      <QuickViewModal product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAdd={addProduct} />
+      <BookingModal service={bookingService} open={bookingOpen} onClose={() => setBookingOpen(false)} />
+      <CartDrawer
+        open={cartOpen}
+        items={cart}
+        onClose={() => setCartOpen(false)}
+        onUpdate={(key, quantity) => setCart((current) => current.map((item) => (item.key === key ? { ...item, quantity } : item)))}
+        onRemove={(key) => setCart((current) => current.filter((item) => item.key !== key))}
+        onAddProduct={addProduct}
+        onCheckout={() => setToast('Mock checkout opened. No payment was processed.')}
+      />
+      {toast && <Toast message={toast} />}
     </div>
   );
 }
