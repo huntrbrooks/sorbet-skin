@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sorbet Skin favicon">
+  <defs>
+    <linearGradient id="sorbet" x1="8" x2="56" y1="10" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB38A"/>
+      <stop offset="0.5" stop-color="#FF8FBC"/>
+      <stop offset="1" stop-color="#B8A7FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="22" fill="#FFF3DD"/>
+  <path d="M18 35c0-9.4 6.4-17 14.3-17 7.4 0 13.4 6.2 13.4 13.8 0 8.9-7.6 14.2-14.1 14.2H20.8A2.8 2.8 0 0 1 18 43.2V35Z" fill="url(#sorbet)"/>
+  <path d="M24 37c5.5 4 12.2 3.8 18.8-1.1" fill="none" stroke="#FFFDF6" stroke-width="4" stroke-linecap="round"/>
+  <path d="M25.5 27.6c2.5-3 6.4-4.1 10.1-2.5" fill="none" stroke="#FFFDF6" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+</svg>

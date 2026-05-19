@@ -1,0 +1,574 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:wght@400;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #302621;
+  background: #fffdf6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 243, 221, 0.56), rgba(255, 253, 246, 1) 34%),
+    #fffdf6;
+}
+
+button,
+a,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: #ff8fbc;
+  color: #302621;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .section-pad {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+
+  .section-heading {
+    @apply mx-auto mb-10 max-w-3xl text-center;
+  }
+
+  .section-heading h2 {
+    @apply font-display text-4xl font-black leading-none text-cocoa sm:text-5xl;
+  }
+
+  .section-heading p {
+    @apply mt-4 text-lg font-semibold leading-8 text-charcoal/75;
+  }
+
+  .section-kicker {
+    @apply mb-3 text-sm font-black uppercase text-caramel;
+  }
+
+  .primary-button {
+    @apply inline-flex min-h-14 items-center gap-2 rounded-full bg-cocoa px-6 py-3 text-base font-black text-vanilla shadow-button transition hover:-translate-y-0.5 hover:bg-caramel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .secondary-button {
+    @apply inline-flex min-h-14 items-center justify-center rounded-full border border-caramel/20 bg-white/70 px-6 py-3 text-base font-black text-cocoa transition hover:-translate-y-0.5 hover:bg-buttercream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .small-button {
+    @apply inline-flex min-h-10 items-center justify-center rounded-full px-4 py-2 text-sm font-black transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .icon-button {
+    @apply grid h-11 w-11 place-items-center rounded-full bg-buttercream text-cocoa transition hover:-translate-y-0.5 hover:bg-peach/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .quantity-button {
+    @apply grid h-8 w-8 place-items-center rounded-full bg-buttercream text-cocoa transition hover:bg-peach/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .badge-pill {
+    @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black shadow-sm;
+  }
+
+  .mini-chip {
+    @apply inline-flex items-center rounded-full bg-white/70 px-3 py-1.5 text-xs font-black text-cocoa shadow-sm;
+  }
+
+  .filter-chip {
+    @apply rounded-full border border-caramel/15 bg-buttercream/60 px-3 py-2 text-sm font-extrabold text-cocoa transition hover:-translate-y-0.5 hover:bg-peach/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .filter-chip-active {
+    @apply border-cocoa bg-cocoa text-vanilla hover:bg-cocoa;
+  }
+
+  .tab-button {
+    @apply rounded-full bg-white/60 px-4 py-2 text-sm font-black text-cocoa transition hover:bg-peach/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .tab-button-active {
+    @apply bg-cocoa text-vanilla hover:bg-cocoa;
+  }
+
+  .quiz-option {
+    @apply rounded-[24px] border border-caramel/10 bg-buttercream/80 p-5 text-left text-lg font-black text-cocoa shadow-sm transition hover:-translate-y-1 hover:bg-peach/30 hover:shadow-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .bundle-choice {
+    @apply rounded-[28px] border border-caramel/10 bg-white/75 p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-soft disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .bundle-choice-active {
+    @apply border-cocoa bg-buttercream shadow-soft ring-2 ring-peach;
+  }
+
+  .ingredient-chip {
+    @apply rounded-full border border-caramel/15 bg-white/70 px-4 py-3 text-sm font-black text-cocoa transition hover:-translate-y-0.5 hover:bg-mint/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blush;
+  }
+
+  .ingredient-chip-active {
+    @apply border-cocoa bg-cocoa text-vanilla hover:bg-cocoa;
+  }
+
+  .footer-title {
+    @apply mb-4 text-sm font-black uppercase text-cocoa;
+  }
+
+  .footer-link {
+    @apply mb-2 block text-sm font-bold text-charcoal/70 transition hover:text-blush;
+  }
+}
+
+.product-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(201, 137, 75, 0.12);
+  border-radius: 34px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 54px rgba(107, 65, 42, 0.1);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.product-card::before {
+  position: absolute;
+  inset: -40% 8% auto;
+  height: 120px;
+  content: '';
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  transform: translateX(-60%) rotate(12deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.product-card:hover {
+  border-color: rgba(255, 143, 188, 0.32);
+  box-shadow: 0 26px 80px rgba(107, 65, 42, 0.16);
+  transform: translateY(-6px);
+}
+
+.product-card:hover::before {
+  animation: shimmer 1.8s ease;
+  opacity: 1;
+}
+
+.product-render {
+  --accent: #ffb38a;
+  position: relative;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.product-render-sm {
+  width: 5.25rem;
+  height: 6.25rem;
+}
+
+.product-render-md {
+  width: 8rem;
+  height: 11rem;
+}
+
+.product-render-lg {
+  width: 11rem;
+  height: 15rem;
+}
+
+.product-render-hero {
+  width: min(18rem, 54vw);
+  height: min(25rem, 76vw);
+}
+
+.product-glow {
+  position: absolute;
+  bottom: 2%;
+  width: 74%;
+  height: 20%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 52%, transparent);
+  filter: blur(14px);
+  opacity: 0.45;
+  z-index: -1;
+}
+
+.product-cap {
+  position: absolute;
+  top: 4%;
+  width: 38%;
+  height: 13%;
+  border-radius: 20px 20px 10px 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), color-mix(in srgb, var(--accent) 42%, white)),
+    var(--accent);
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  box-shadow: inset -8px 0 16px rgba(107, 65, 42, 0.08), 0 10px 18px rgba(107, 65, 42, 0.12);
+  z-index: 2;
+}
+
+.product-body {
+  position: absolute;
+  bottom: 5%;
+  display: flex;
+  width: 66%;
+  height: 78%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.72);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 30% 12%, rgba(255, 255, 255, 0.96), transparent 24%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.88), color-mix(in srgb, var(--accent) 58%, white) 45%, var(--accent));
+  box-shadow:
+    inset -16px 0 24px rgba(107, 65, 42, 0.1),
+    inset 10px 0 24px rgba(255, 255, 255, 0.48),
+    0 24px 40px rgba(107, 65, 42, 0.18);
+  text-align: center;
+}
+
+.product-highlight {
+  position: absolute;
+  left: 16%;
+  top: 8%;
+  width: 14%;
+  height: 54%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  filter: blur(0.5px);
+}
+
+.product-brand {
+  position: relative;
+  margin-bottom: 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 253, 246, 0.76);
+  padding: 0.24rem 0.46rem;
+  color: #6b412a;
+  font-size: clamp(0.38rem, 1vw, 0.66rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.product-name {
+  position: relative;
+  max-width: 78%;
+  color: #302621;
+  font-family: 'Baloo 2', ui-rounded, system-ui, sans-serif;
+  font-size: clamp(0.7rem, 2.2vw, 1.18rem);
+  font-weight: 900;
+  line-height: 0.96;
+}
+
+.product-type {
+  position: relative;
+  margin-top: 0.55rem;
+  max-width: 74%;
+  color: rgba(48, 38, 33, 0.72);
+  font-size: clamp(0.44rem, 1.2vw, 0.68rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.product-render-sm .product-body {
+  border-radius: 22px;
+}
+
+.product-render-sm .product-brand {
+  padding: 0.18rem 0.28rem;
+  font-size: 0.28rem;
+}
+
+.product-render-sm .product-name {
+  font-size: 0.52rem;
+}
+
+.product-render-sm .product-type {
+  display: none;
+}
+
+.product-render-drops .product-body,
+.product-render-oil .product-body {
+  width: 48%;
+  border-radius: 30px 30px 40px 40px;
+}
+
+.product-render-drops .product-cap {
+  top: 0;
+  width: 26%;
+  height: 18%;
+  border-radius: 14px 14px 7px 7px;
+  background: #302621;
+}
+
+.product-render-oil .product-cap {
+  width: 28%;
+}
+
+.product-render-pro .product-body {
+  width: 76%;
+  border-radius: 28px;
+}
+
+.product-render-pro .product-cap {
+  width: 44%;
+  height: 10%;
+}
+
+.product-render-blur .product-body {
+  border-radius: 38px 38px 28px 28px;
+}
+
+.product-render-prep .product-body {
+  border-radius: 42px 42px 30px 30px;
+}
+
+.mitt-shape {
+  position: relative;
+  width: 64%;
+  height: 78%;
+  border: 3px solid rgba(255, 255, 255, 0.76);
+  border-radius: 48% 52% 38% 38% / 44% 44% 28% 28%;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.86), transparent 24%),
+    linear-gradient(145deg, color-mix(in srgb, var(--accent) 70%, white), var(--accent));
+  box-shadow:
+    inset -14px -8px 24px rgba(107, 65, 42, 0.1),
+    0 24px 38px rgba(107, 65, 42, 0.16);
+}
+
+.mitt-cuff {
+  position: absolute;
+  bottom: 5%;
+  left: 10%;
+  width: 80%;
+  border-radius: 999px;
+  background: rgba(255, 253, 246, 0.78);
+  padding: 0.4rem 0.2rem;
+  color: #302621;
+  text-align: center;
+  font-size: clamp(0.42rem, 1.5vw, 0.7rem);
+  font-weight: 900;
+}
+
+.sorbet-orbit {
+  position: relative;
+  min-height: 520px;
+  border-radius: 42px;
+}
+
+.scoop-shape,
+.foam-blob,
+.whipped-shape {
+  position: absolute;
+  pointer-events: none;
+}
+
+.scoop-shape {
+  border-radius: 46% 54% 58% 42% / 48% 46% 54% 52%;
+  opacity: 0.76;
+}
+
+.scoop-one {
+  inset: 2% auto auto 20%;
+  width: 60%;
+  height: 62%;
+  background: linear-gradient(135deg, rgba(255, 143, 188, 0.22), rgba(255, 179, 138, 0.46));
+}
+
+.scoop-two {
+  right: 3%;
+  bottom: 6%;
+  width: 44%;
+  height: 48%;
+  background: linear-gradient(145deg, rgba(184, 167, 255, 0.42), rgba(190, 229, 197, 0.52));
+}
+
+.foam-blob {
+  border-radius: 42% 58% 44% 56% / 60% 40% 60% 40%;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: inset 12px -16px 34px rgba(255, 179, 138, 0.18);
+}
+
+.blob-one {
+  left: 8%;
+  top: 18%;
+  width: 120px;
+  height: 86px;
+}
+
+.blob-two {
+  right: 14%;
+  bottom: 20%;
+  width: 110px;
+  height: 92px;
+}
+
+.whipped-shape {
+  border-radius: 50% 50% 42% 58% / 52% 48% 58% 42%;
+  box-shadow: inset 14px -18px 34px rgba(201, 137, 75, 0.08);
+}
+
+.bronze-ribbon {
+  position: absolute;
+  bottom: 10%;
+  left: -8%;
+  width: 118%;
+  height: 116px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(201, 137, 75, 0.2), rgba(231, 168, 78, 0.18), transparent);
+  transform: rotate(-4deg);
+  pointer-events: none;
+}
+
+.tooltip-card {
+  position: relative;
+}
+
+.tooltip-text {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  z-index: 20;
+  width: min(230px, 80vw);
+  transform: translate(-50%, -4px);
+  border-radius: 18px;
+  background: #302621;
+  color: #fffdf6;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.45;
+  opacity: 0;
+  padding: 0.72rem 0.9rem;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.tooltip-card:hover .tooltip-text,
+.tooltip-card:focus .tooltip-text,
+.tooltip-card:focus-within .tooltip-text {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.before-after {
+  position: relative;
+  min-height: 420px;
+  overflow: hidden;
+  border: 12px solid rgba(255, 255, 255, 0.82);
+  border-radius: 42px;
+  background: #fff3dd;
+  box-shadow: 0 24px 70px rgba(107, 65, 42, 0.16);
+}
+
+.before-layer,
+.after-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.before-layer {
+  background:
+    radial-gradient(circle at 38% 28%, rgba(255, 253, 246, 0.72), transparent 18%),
+    linear-gradient(135deg, #f3c8b7 0%, #eab39d 42%, #d7a28c 100%);
+}
+
+.after-layer {
+  background:
+    radial-gradient(circle at 38% 28%, rgba(255, 253, 246, 0.5), transparent 18%),
+    linear-gradient(135deg, #d99a54 0%, #b66f36 44%, #7a4428 100%);
+}
+
+.ba-label {
+  position: absolute;
+  top: 18px;
+  z-index: 4;
+  border-radius: 999px;
+  background: rgba(255, 253, 246, 0.86);
+  color: #302621;
+  font-weight: 900;
+  padding: 0.45rem 0.8rem;
+}
+
+.ba-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 4px;
+  transform: translateX(-50%);
+  background: rgba(255, 253, 246, 0.9);
+  box-shadow: 0 0 0 999px transparent;
+}
+
+.ba-handle::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  content: '';
+  transform: translate(-50%, -50%);
+  border: 4px solid rgba(255, 253, 246, 0.9);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent 42%, #302621 42% 46%, transparent 46% 54%, #302621 54% 58%, transparent 58%),
+    #ffb38a;
+  box-shadow: 0 12px 28px rgba(48, 38, 33, 0.22);
+}
+
+.ba-range {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  cursor: ew-resize;
+  opacity: 0;
+}
+
+@media (max-width: 640px) {
+  .product-render-hero {
+    width: min(15rem, 70vw);
+    height: min(21rem, 88vw);
+  }
+
+  .sorbet-orbit {
+    min-height: 460px;
+  }
+
+  .before-after {
+    min-height: 330px;
+    border-width: 8px;
+  }
+}
