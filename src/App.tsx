@@ -198,8 +198,11 @@ function AnnouncementBar() {
   }, []);
 
   return (
-    <div className="bg-foreground px-4 py-2 text-center text-xs font-semibold uppercase text-background sm:text-sm">
-      {announcementMessages[index]}
+    <div
+      className="announcement-strip flex items-center justify-center px-4 py-2 text-center"
+      style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
+    >
+      <span className="truncate text-[0.65rem] sm:text-xs">{announcementMessages[index]}</span>
     </div>
   );
 }
@@ -208,8 +211,25 @@ function Header({ cartCount, onCartOpen, onBook }: { cartCount: number; onCartOp
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setMobileOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileOpen]);
+
   const handleNav = (id: string) => {
     setMobileOpen(false);
+    setSearchOpen(false);
     if (id === 'book') {
       onBook();
       return;
@@ -218,17 +238,25 @@ function Header({ cartCount, onCartOpen, onBook }: { cartCount: number; onCartOp
   };
 
   return (
-    <header className="border-b border-border bg-background/92 px-4 py-3 shadow-editorial backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        <button className="group flex items-center gap-3 text-left" onClick={() => scrollToId('top')} aria-label="Sorbet Skin home">
-          <span className="brand-mark">SS</span>
-          <span>
-            <span className="block font-display text-2xl font-normal leading-none text-foreground">Sorbet Skin</span>
-            <span className="block text-[11px] font-semibold uppercase text-accent">Whipped glow, zero sun damage.</span>
+    <header className="border-b border-border bg-background/92 shadow-editorial backdrop-blur-xl">
+      <div className="container-pad mx-auto flex max-w-7xl items-center justify-between gap-3 py-3 sm:gap-4">
+        <button
+          className="group flex min-w-0 items-center gap-2 text-left sm:gap-3"
+          onClick={() => scrollToId('top')}
+          aria-label="Sorbet Skin home"
+        >
+          <span className="brand-mark shrink-0" aria-hidden="true" />
+          <span className="min-w-0">
+            <span className="block truncate font-display text-xl font-normal leading-none text-foreground sm:text-2xl">
+              Sorbet Skin
+            </span>
+            <span className="hidden text-[10px] font-semibold uppercase text-accent sm:block sm:text-[11px]">
+              Whipped glow, zero sun damage.
+            </span>
           </span>
         </button>
 
-        <nav className="hidden items-center gap-1 xl:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
           {navLinks.map(([label, id]) => (
             <button key={id} className="nav-link" onClick={() => handleNav(id)}>
               {label}
@@ -236,40 +264,126 @@ function Header({ cartCount, onCartOpen, onBook }: { cartCount: number; onCartOp
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <button className="icon-button" aria-label="Search Sorbet Skin" onClick={() => setSearchOpen((open) => !open)}>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <button
+            className="icon-button hidden sm:grid"
+            aria-label="Search Sorbet Skin"
+            aria-expanded={searchOpen}
+            onClick={() => setSearchOpen((open) => !open)}
+          >
             <Search size={20} />
           </button>
-          <button className="icon-button relative" aria-label={`Open cart with ${cartCount} items`} onClick={onCartOpen}>
+          <button
+            className="icon-button relative"
+            aria-label={`Open cart with ${cartCount} items`}
+            onClick={onCartOpen}
+          >
             <ShoppingBag size={20} />
             {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
           </button>
-          <button className="primary-button hidden min-h-11 px-5 py-2 text-sm lg:inline-flex" onClick={onBook}>
+          <button
+            className="primary-button hidden min-h-11 px-5 py-2 text-sm xl:inline-flex"
+            onClick={onBook}
+          >
             Book Now
           </button>
-          <button className="icon-button xl:hidden" aria-label="Open menu" onClick={() => setMobileOpen((open) => !open)}>
+          <button
+            className="icon-button lg:hidden"
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((open) => !open)}
+          >
             {mobileOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
         </div>
       </div>
 
       {searchOpen && (
-        <div className="mx-auto mt-3 max-w-7xl rounded-lg border border-border bg-card p-3 shadow-soft">
-          <label className="flex items-center gap-3 rounded-md bg-muted px-4 py-3 text-sm font-normal text-muted-foreground">
-            <Search size={18} className="text-accent" />
-            <input className="w-full bg-transparent outline-none" placeholder="Search services, products, prep guides..." />
+        <div className="container-pad mx-auto max-w-7xl pb-3">
+          <label className="flex items-center gap-3 rounded-full bg-muted px-4 py-3 text-sm font-normal text-muted-foreground">
+            <Search size={18} className="text-accent shrink-0" />
+            <input
+              className="w-full bg-transparent outline-none placeholder:text-muted-foreground/70"
+              placeholder="Search services, products, prep guides..."
+            />
+            <button
+              type="button"
+              className="text-xs font-semibold uppercase tracking-wider text-accent"
+              onClick={() => setSearchOpen(false)}
+            >
+              Close
+            </button>
           </label>
         </div>
       )}
 
       {mobileOpen && (
-        <nav className="mx-auto mt-4 grid max-w-7xl gap-2 rounded-lg border border-border bg-card p-3 shadow-soft sm:grid-cols-2 xl:hidden" aria-label="Mobile navigation">
-          {navLinks.map(([label, id]) => (
-            <button key={id} className="nav-link justify-start" onClick={() => handleNav(id)}>
-              {label}
-            </button>
-          ))}
-        </nav>
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
+        >
+          <div
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+          <nav
+            className="relative ml-auto flex h-full w-full max-w-sm flex-col bg-background shadow-soft"
+            aria-label="Mobile navigation"
+          >
+            <div className="container-pad flex items-center justify-between border-b border-border py-3">
+              <span className="brand-mark" aria-hidden="true" />
+              <button
+                className="icon-button"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+              >
+                <X size={21} />
+              </button>
+            </div>
+            <div className="container-pad flex-1 overflow-y-auto py-4">
+              <div className="mb-4">
+                <label className="flex items-center gap-3 rounded-full bg-muted px-4 py-3 text-sm font-normal text-muted-foreground">
+                  <Search size={18} className="text-accent shrink-0" />
+                  <input
+                    className="w-full bg-transparent outline-none placeholder:text-muted-foreground/70"
+                    placeholder="Search Sorbet Skin..."
+                  />
+                </label>
+              </div>
+              <ul className="grid gap-1">
+                {navLinks.map(([label, id]) => (
+                  <li key={id}>
+                    <button
+                      className="nav-link w-full justify-start px-4 py-3 text-sm"
+                      onClick={() => handleNav(id)}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="container-pad border-t border-border py-4">
+              <button
+                className="primary-button w-full"
+                onClick={() => {
+                  setMobileOpen(false);
+                  onBook();
+                }}
+              >
+                <CalendarDays size={18} />
+                Book Now
+              </button>
+            </div>
+          </nav>
+        </div>
       )}
     </header>
   );
@@ -280,35 +394,38 @@ function Hero({ onBook }: { onBook: () => void }) {
   const heroProducts = ['peach-glaze', 'cocoa-drip', 'honey-dew-drops'].map(productById);
 
   return (
-    <section id="top" className="relative overflow-hidden bg-background px-4 pb-16 pt-14 sm:pb-20 lg:pb-28">
-      <div className="bronze-ribbon animate-ribbon" />
-      <div className="whipped-shape left-[4%] top-24 h-32 w-32 bg-white/58" />
-      <div className="whipped-shape right-[9%] top-40 h-24 w-24 bg-card/60" />
+    <section
+      id="top"
+      className="container-pad relative overflow-hidden bg-background pb-12 pt-10 sm:pb-16 sm:pt-14 lg:pb-28"
+    >
+      <div className="bronze-ribbon animate-ribbon" aria-hidden="true" />
+      <div className="whipped-shape left-[4%] top-20 h-20 w-20 sm:top-24 sm:h-32 sm:w-32" aria-hidden="true" />
+      <div className="whipped-shape right-[6%] top-32 h-16 w-16 sm:right-[9%] sm:top-40 sm:h-24 sm:w-24" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-8 sm:gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
         <div className="animate-fadeUp">
-          <h1 className="max-w-4xl font-display text-5xl font-normal leading-tight text-foreground sm:text-6xl lg:text-7xl">
+          <h1 className="hero-headline max-w-4xl">
             Melbourne's softest spray tan and whipped self-tan glow.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg font-normal leading-8 text-muted-foreground sm:text-xl">
+          <p className="hero-copy mt-5 max-w-2xl sm:mt-6">
             Expert studio tans, mobile appointments, bridal bronze, competition colour, and dessert-soft at-home self-tanning products designed for a streak-free glow without the fake tan smell.
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <button className="primary-button" onClick={onBook}>
+          <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
+            <button className="primary-button w-full sm:w-auto" onClick={onBook}>
               <CalendarDays size={20} />
               Book Your Tan
             </button>
-            <button className="secondary-button" onClick={() => scrollToId('shop')}>
+            <button className="secondary-button w-full sm:w-auto" onClick={() => scrollToId('shop')}>
               Shop Sorbet Skin
             </button>
-            <button className="ghost-button" onClick={() => scrollToId('quiz')}>
+            <button className="ghost-button w-full sm:w-auto" onClick={() => scrollToId('quiz')}>
               Find My Glow
               <ArrowRight size={18} />
             </button>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap gap-2 sm:mt-8">
             {badges.map((badge, index) => (
               <span key={badge} className="badge-pill fade-badge" style={{ animationDelay: `${index * 70}ms` }}>
                 <Sparkles size={14} />
@@ -316,25 +433,30 @@ function Hero({ onBook }: { onBook: () => void }) {
               </span>
             ))}
           </div>
-          <p className="mt-4 text-sm font-semibold text-muted-foreground">{spfDisclaimer}</p>
+          <p className="mt-4 text-sm font-semibold leading-relaxed text-muted-foreground">{spfDisclaimer}</p>
         </div>
 
-        <div className="relative min-h-[440px] sm:min-h-[560px]">
+        <div className="hero-stage relative">
           <div className="hero-image-card">
-            <img src="/assets/sorbet-product-line.svg" alt="Sorbet Skin original ribbed-cap self-tanning product range" />
-            <div className="hero-shine" />
+            <img
+              src="/assets/sorbet-product-line.svg"
+              alt="Sorbet Skin original ribbed-cap self-tanning product range"
+              loading="eager"
+              decoding="async"
+            />
+            <div className="hero-shine" aria-hidden="true" />
           </div>
-          <div className="absolute -left-2 bottom-8 hidden rotate-[-8deg] sm:block">
+          <div className="hero-floater hero-floater--left hidden rotate-[-8deg] md:block">
             <ProductRender product={heroProducts[0]} size="lg" float />
           </div>
-          <div className="absolute -right-2 top-16 hidden rotate-[7deg] sm:block">
+          <div className="hero-floater hero-floater--right hidden rotate-[7deg] md:block">
             <ProductRender product={heroProducts[1]} size="md" float />
           </div>
-          <div className="absolute bottom-2 right-20 hidden rotate-[5deg] md:block">
+          <div className="hero-floater hero-floater--small hidden rotate-[5deg] xl:block">
             <ProductRender product={heroProducts[2]} size="sm" float />
           </div>
-          <div className="foam-stroke left-[10%] top-[8%]" />
-          <div className="foam-stroke bottom-[12%] right-[9%]" />
+          <div className="foam-stroke left-[10%] top-[8%]" aria-hidden="true" />
+          <div className="foam-stroke bottom-[12%] right-[9%]" aria-hidden="true" />
         </div>
       </div>
     </section>
@@ -352,11 +474,11 @@ function SocialProofStrip() {
   ] as const;
 
   return (
-    <section className="border-y border-caramel/10 bg-warmwhite px-4 py-5">
-      <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-6">
+    <section className="container-pad border-y border-border bg-background py-5 sm:py-6">
+      <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {items.map(([label, Icon]) => (
           <div key={label} className="proof-card">
-            <Icon size={20} />
+            <Icon size={20} className="shrink-0" />
             <span>{label}</span>
           </div>
         ))}
@@ -367,18 +489,18 @@ function SocialProofStrip() {
 
 function BookingPanel({ onBook }: { onBook: (service?: Service) => void }) {
   return (
-    <section id="book" className="section-pad bg-vanilla px-4">
+    <section id="book" className="container-pad section-pad bg-vanilla">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Book online" title="Choose Your Glow Appointment" copy="Salon-grade spray tan services for everyday glow, weddings, mobile appointments, and stage-ready bronze." />
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {services.map((service) => (
             <article key={service.id} className="service-card">
-              <div className="flex items-start justify-between gap-4">
-                <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
                   <p className="tag-pill">{service.bestFor}</p>
-                  <h3 className="mt-4 font-display text-3xl font-semibold leading-none text-cocoa">{service.name}</h3>
+                  <h3 className="mt-4 font-display text-2xl font-semibold leading-tight text-cocoa sm:text-3xl">{service.name}</h3>
                 </div>
-                <span className="price-pill">{service.price}</span>
+                <span className="price-pill shrink-0">{service.price}</span>
               </div>
               <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-foreground/80">
                 <span className="mini-chip"><Clock size={14} /> {service.duration}</span>
@@ -389,7 +511,7 @@ function BookingPanel({ onBook }: { onBook: (service?: Service) => void }) {
                 <button className="primary-button min-h-11 flex-1 justify-center px-4 py-2 text-sm" onClick={() => onBook(service)}>
                   Book Now
                 </button>
-                <button className="secondary-button min-h-11 flex-1 px-4 py-2 text-sm" onClick={() => scrollToId('prep-care')}>
+                <button className="secondary-button min-h-11 flex-1 justify-center px-4 py-2 text-sm" onClick={() => scrollToId('prep-care')}>
                   View Prep Guide
                 </button>
               </div>
@@ -412,27 +534,27 @@ function ServicesPage({ onBook }: { onBook: (service?: Service) => void }) {
   ];
 
   return (
-    <section id="services" className="section-pad bg-warmwhite px-4">
+    <section id="services" className="container-pad section-pad bg-warmwhite">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Service menu" title="Professional tanning, built around your calendar." copy="Every appointment includes prep guidance, colour consultation, and aftercare notes. Self-tan does not contain SPF and does not protect against UV exposure. Wear SPF daily." />
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map(([title, copy]) => (
-            <div key={title} className="soft-panel p-6">
+            <div key={title} className="soft-panel p-5 sm:p-6">
               <Sparkles className="text-caramel" size={24} />
-              <h3 className="mt-4 font-display text-2xl font-semibold text-cocoa">{title}</h3>
+              <h3 className="mt-4 font-display text-xl font-semibold text-cocoa sm:text-2xl">{title}</h3>
               <p className="mt-3 text-sm font-medium leading-7 text-charcoal/70">{copy}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="soft-panel p-6">
-            <h3 className="font-display text-3xl font-semibold text-cocoa">Add-ons</h3>
+        <div className="mt-8 grid gap-6 lg:mt-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-8">
+          <div className="soft-panel p-5 sm:p-6">
+            <h3 className="font-display text-2xl font-semibold text-cocoa sm:text-3xl">Add-ons</h3>
             <div className="mt-5 grid gap-3">
               {serviceAddons.map((addon) => (
                 <div key={addon.name} className="addon-row">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <h4>{addon.name}</h4>
                     <p>{addon.copy}</p>
                   </div>
@@ -443,7 +565,7 @@ function ServicesPage({ onBook }: { onBook: (service?: Service) => void }) {
           </div>
 
           <div className="soft-panel overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="service-table-wrap">
               <table className="service-table">
                 <thead>
                   <tr>
@@ -482,18 +604,23 @@ function PackagesSection({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>, 
   const [gifted, setGifted] = useState<Record<string, boolean>>({});
 
   return (
-    <section id="packages" className="section-pad bg-muted px-4">
+    <section id="packages" className="container-pad section-pad bg-muted">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Prepaid packages" title="Glow More, Pay Less" copy="Prepay for your studio tans, keep them for yourself, or gift the glow to someone who lives by calendar reminders." />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {packages.map((pack) => (
             <article key={pack.id} className="package-card">
               {pack.badge && <span className="save-badge">{pack.badge}</span>}
-              <h3 className="font-display text-3xl font-semibold text-cocoa">{pack.name}</h3>
+              <h3 className="font-display text-2xl font-semibold leading-tight text-cocoa sm:text-3xl">{pack.name}</h3>
               <p className="mt-3 text-sm font-bold text-charcoal/70">{pack.includes}</p>
-              <p className="mt-6 font-display text-4xl font-normal text-foreground">{formatPrice(pack.price)}</p>
-              <label className="mt-5 flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground">
-                <input type="checkbox" checked={!!gifted[pack.id]} onChange={(event) => setGifted((current) => ({ ...current, [pack.id]: event.target.checked }))} />
+              <p className="mt-5 font-display text-3xl font-normal text-foreground sm:mt-6 sm:text-4xl">{formatPrice(pack.price)}</p>
+              <label className="mt-5 flex items-center gap-3 rounded-full border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 shrink-0 accent-accent"
+                  checked={!!gifted[pack.id]}
+                  onChange={(event) => setGifted((current) => ({ ...current, [pack.id]: event.target.checked }))}
+                />
                 Gift option
               </label>
               <button
@@ -527,27 +654,27 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <section id="bridal" className="section-pad bg-warmwhite px-4">
+    <section id="bridal" className="container-pad section-pad bg-warmwhite">
       <div className="mx-auto max-w-7xl">
         <div className="bridal-hero">
           <div>
             <p className="section-kicker">Bridal Glow</p>
-            <h2 className="font-display text-5xl font-semibold leading-none text-cocoa sm:text-6xl">Your wedding glow, colour matched.</h2>
-            <p className="mt-5 max-w-2xl text-lg font-medium leading-8 text-charcoal/75">
+            <h2 className="display-h2 mt-2">Your wedding glow, colour matched.</h2>
+            <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-charcoal/75 sm:text-lg sm:leading-8">
               Bridal tans need softer planning: dress colour, photography, trial timing, party coordination, and a rinse plan that fits your wedding week.
             </p>
-            <button className="primary-button mt-7" onClick={() => onBook(services.find((service) => service.id === 'bridal-trial-tan'))}>
+            <button className="primary-button mt-6 w-full sm:mt-7 sm:w-auto" onClick={() => onBook(services.find((service) => service.id === 'bridal-trial-tan'))}>
               Book Trial Tan
             </button>
           </div>
           <div className="editorial-skin-frame bridal-skin">
-            <img src="/assets/bridal-glow-editorial.svg" alt="Soft bridal spray tan glow editorial with Sorbet Skin product" />
+            <img src="/assets/bridal-glow-editorial.svg" alt="Soft bridal spray tan glow editorial with Sorbet Skin product" loading="lazy" decoding="async" />
           </div>
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="soft-panel p-6">
-            <h3 className="font-display text-3xl font-semibold text-cocoa">Why bridal tans need a trial</h3>
+        <div className="mt-8 grid gap-6 lg:mt-10 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="soft-panel p-5 sm:p-6">
+            <h3 className="display-h3">Why bridal tans need a trial</h3>
             <p className="mt-4 text-sm font-medium leading-7 text-charcoal/70">
               A trial lets us test colour depth, undertone, fade pattern, and comfort before your final wedding week tan. It helps the finished glow feel like skin, not a surprise.
             </p>
@@ -561,8 +688,8 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
             </div>
           </div>
 
-          <div className="soft-panel p-6">
-            <h3 className="font-display text-3xl font-semibold text-cocoa">Bridal timeline</h3>
+          <div className="soft-panel p-5 sm:p-6">
+            <h3 className="display-h3">Bridal timeline</h3>
             <div className="mt-5 grid gap-3">
               {bridalTimeline.map(([time, task]) => (
                 <div key={time} className="timeline-row">
@@ -574,12 +701,12 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {bridalPackages.map((pack) => (
             <article key={pack.name} className="package-card">
-              <h3 className="font-display text-2xl font-semibold text-cocoa">{pack.name}</h3>
+              <h3 className="font-display text-xl font-semibold text-cocoa sm:text-2xl">{pack.name}</h3>
               <p className="mt-3 text-sm font-bold leading-6 text-charcoal/70">{pack.includes}</p>
-              <p className="mt-5 font-display text-3xl font-normal text-accent">{pack.price}</p>
+              <p className="mt-5 font-display text-2xl font-normal text-accent sm:text-3xl">{pack.price}</p>
             </article>
           ))}
         </div>
@@ -593,9 +720,9 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
         >
           <div>
             <p className="section-kicker">Quote request</p>
-            <h3 className="font-display text-3xl font-semibold text-cocoa">Plan the bridal party glow.</h3>
+            <h3 className="display-h3 mt-1">Plan the bridal party glow.</h3>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Wedding date"><TextInput type="date" required /></Field>
             <Field label="Location"><TextInput placeholder="Suburb or venue" required /></Field>
             <Field label="Bridal party size"><TextInput type="number" min="1" placeholder="5" /></Field>
@@ -603,7 +730,7 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
             <Field label="Skin tone"><SelectInput><option>Fair</option><option>Light</option><option>Medium</option><option>Olive</option><option>Deep</option></SelectInput></Field>
             <Field label="Desired colour"><SelectInput><option>Soft bridal glow</option><option>Golden bronze</option><option>Deeper bronze</option></SelectInput></Field>
           </div>
-          {submitted ? <p className="success-message">Your bridal glow request has been received. We will be in touch with a tailored quote.</p> : <button className="primary-button w-fit">Request Bridal Quote</button>}
+          {submitted ? <p className="success-message">Your bridal glow request has been received. We will be in touch with a tailored quote.</p> : <button className="primary-button w-full sm:w-fit">Request Bridal Quote</button>}
         </form>
       </div>
     </section>
@@ -618,33 +745,33 @@ function MobileTanningPage({ onBook }: { onBook: (service?: Service) => void }) 
   const estimate = base + Math.max(0, people - 1) * 45 + (postcode.length >= 4 && !postcode.startsWith('3') ? 25 : 0);
 
   return (
-    <section id="mobile" className="section-pad bg-vanilla px-4">
+    <section id="mobile" className="container-pad section-pad bg-vanilla">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Mobile tanning" title="Sorbet Skin comes to you." copy="A professional mobile tanning setup for homes, hotels, bridal suites, group bookings, and event prep across selected Melbourne areas." />
-        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
             {[
               ['How mobile tanning works', 'Tell us your date, location, group size, and tan goals. We confirm timing, setup, and travel notes.'],
               ['Service area', 'Selected Melbourne suburbs with travel notes based on postcode, parking, and appointment time.'],
               ['Pricing', 'Mobile tans start from $95, with group pricing and bridal quotes available.'],
               ['Group bookings', 'Perfect for bridal parties, event squads, dance teams, and content days.'],
             ].map(([title, copy]) => (
-              <div key={title} className="soft-panel p-6">
+              <div key={title} className="soft-panel p-5 sm:p-6">
                 <Truck className="text-caramel" size={24} />
-                <h3 className="mt-4 font-display text-2xl font-semibold text-cocoa">{title}</h3>
+                <h3 className="mt-4 font-display text-xl font-semibold text-cocoa sm:text-2xl">{title}</h3>
                 <p className="mt-3 text-sm font-medium leading-7 text-charcoal/70">{copy}</p>
               </div>
             ))}
           </div>
 
-          <div className="soft-panel p-6">
+          <div className="soft-panel p-5 sm:p-6">
             <div className="map-placeholder">
               <span>Melbourne</span>
               <i className="pin pin-one" />
               <i className="pin pin-two" />
               <i className="pin pin-three" />
             </div>
-            <h3 className="mt-6 font-display text-3xl font-semibold text-cocoa">Setup requirements</h3>
+            <h3 className="display-h3 mt-6">Setup requirements</h3>
             <div className="mt-4 grid gap-2">
               {['Private space', 'Good lighting', 'Power access if required', 'Ventilation', 'Loose dark clothing ready', 'No deodorant, perfume, or moisturiser on skin'].map((item) => (
                 <div key={item} className="check-row"><Check size={17} /> {item}</div>
@@ -656,22 +783,22 @@ function MobileTanningPage({ onBook }: { onBook: (service?: Service) => void }) 
         <div className="calculator-panel mt-8">
           <div>
             <p className="section-kicker">Mobile booking calculator</p>
-            <h3 className="font-display text-3xl font-semibold text-cocoa">Estimate your starting price.</h3>
+            <h3 className="display-h3 mt-1">Estimate your starting price.</h3>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <Field label="Postcode"><TextInput value={postcode} onChange={(event) => setPostcode(event.target.value)} placeholder="3000" /></Field>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <Field label="Postcode"><TextInput value={postcode} onChange={(event) => setPostcode(event.target.value)} placeholder="3000" inputMode="numeric" /></Field>
             <Field label="People"><TextInput type="number" min="1" value={people} onChange={(event) => setPeople(Number(event.target.value))} /></Field>
             <Field label="Service type"><SelectInput value={serviceType} onChange={(event) => setServiceType(event.target.value)}><option>Signature mobile</option><option>Bridal mobile</option><option>Competition mobile</option></SelectInput></Field>
             <Field label="Event date"><TextInput type="date" /></Field>
             <Field label="Preferred time"><TextInput type="time" /></Field>
           </div>
           <div className="quote-output">
-            <div>
+            <div className="min-w-0 flex-1">
               <span>Estimated starting price</span>
               <strong>{formatPrice(estimate)}</strong>
               <p>Travel confirmed after postcode, parking, and setup details are reviewed.</p>
             </div>
-            <button className="primary-button" onClick={() => onBook(services.find((service) => service.id === 'mobile-tan'))}>
+            <button className="primary-button w-full sm:w-auto" onClick={() => onBook(services.find((service) => service.id === 'mobile-tan'))}>
               Request Mobile Booking
             </button>
           </div>
@@ -685,17 +812,17 @@ function CompetitionPage() {
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <section id="competition" className="section-pad bg-warmwhite px-4">
+    <section id="competition" className="container-pad section-pad bg-warmwhite">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:gap-8">
           <div>
             <p className="section-kicker">Competition Bronze</p>
-            <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Stage-ready bronze for fitness, dance, pageant, and performance clients.</h2>
-            <p className="mt-5 text-lg font-medium leading-8 text-charcoal/75">
+            <h2 className="display-h2 mt-2">Stage-ready bronze for fitness, dance, pageant, and performance clients.</h2>
+            <p className="mt-5 text-base font-medium leading-7 text-charcoal/75 sm:text-lg sm:leading-8">
               Competition tans are built around lighting, schedule, suit or costume colour, and event-day touch points. We keep the guidance practical and skin-safe.
             </p>
           </div>
-          <div className="soft-panel p-6">
+          <div className="soft-panel p-5 sm:p-6">
             <div className="grid gap-4 sm:grid-cols-2">
               {[
                 ['Why competition tans are different', 'Stage lighting can flatten colour, so depth and timing matter.'],
@@ -726,16 +853,16 @@ function CompetitionPage() {
         >
           <div>
             <p className="section-kicker">Booking form</p>
-            <h3 className="font-display text-3xl font-semibold text-cocoa">Tell us about the event.</h3>
+            <h3 className="display-h3 mt-1">Tell us about the event.</h3>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Field label="Name"><TextInput required /></Field>
             <Field label="Email"><TextInput type="email" required /></Field>
             <Field label="Event type"><SelectInput><option>Fitness</option><option>Dance</option><option>Pageant</option><option>Performance</option></SelectInput></Field>
             <Field label="Event date"><TextInput type="date" required /></Field>
           </div>
           <Field label="Notes"><TextArea placeholder="Show time, category, costume colour, preferred depth..." /></Field>
-          {submitted ? <p className="success-message">Your competition bronze request has been received. We will confirm timing shortly.</p> : <button className="primary-button w-fit">Request Competition Booking</button>}
+          {submitted ? <p className="success-message">Your competition bronze request has been received. We will confirm timing shortly.</p> : <button className="primary-button w-full sm:w-fit">Request Competition Booking</button>}
         </form>
       </div>
     </section>
@@ -765,16 +892,18 @@ function FilterGroup({ label, values, selected, onToggle }: { label: string; val
 
 function ProductCard({ product, onAdd, onQuickView }: { product: Product; onAdd: (product: Product, quantity?: number) => void; onQuickView: (product: Product) => void }) {
   return (
-    <article className="product-card group">
+    <article className="product-card group flex h-full flex-col">
       <div className="product-card-media">
         <div className="absolute inset-x-8 top-10 h-20 rounded-full blur-2xl" style={{ backgroundColor: `${product.themeHex}22` }} />
         <ProductRender product={product} size="lg" />
-        <span className="absolute left-4 top-4 rounded-md border border-border bg-card/90 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">Vegan + cruelty-free</span>
+        <span className="absolute left-3 top-3 rounded-full border border-border bg-card/90 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-foreground shadow-sm sm:left-4 sm:top-4 sm:text-xs">
+          Vegan + cruelty-free
+        </span>
       </div>
-      <div className="p-5">
+      <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="font-display text-2xl font-semibold leading-none text-cocoa">{product.name}</h3>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-display text-xl font-semibold leading-tight text-cocoa sm:text-2xl">{product.name}</h3>
             <p className="mt-1 text-sm font-bold text-caramel">{product.type}</p>
           </div>
           <p className="price-pill shrink-0">{formatPrice(product.price)}</p>
@@ -788,11 +917,11 @@ function ProductCard({ product, onAdd, onQuickView }: { product: Product; onAdd:
         <div className="mt-4 flex flex-wrap gap-2">
           {product.claims.slice(0, 4).map((claim) => <span key={claim} className="mini-chip">{claim}</span>)}
         </div>
-        <div className="mt-5 flex items-center justify-between gap-3">
+        <div className="mt-auto flex flex-col gap-3 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <Rating value={product.rating} />
-          <div className="flex gap-2">
-            <button className="small-button bg-card text-foreground hover:bg-muted" onClick={() => onQuickView(product)}>Quick view</button>
-            <button className="small-button bg-cocoa text-vanilla hover:bg-caramel" onClick={() => onAdd(product)}>Add to cart</button>
+          <div className="flex flex-1 gap-2 sm:flex-initial">
+            <button className="small-button flex-1 bg-card text-foreground hover:bg-muted sm:flex-initial" onClick={() => onQuickView(product)}>Quick view</button>
+            <button className="small-button flex-1 bg-cocoa text-vanilla hover:bg-caramel sm:flex-initial" onClick={() => onAdd(product)}>Add to cart</button>
           </div>
         </div>
       </div>
@@ -824,19 +953,19 @@ function ShopPage({ onAdd, onQuickView }: { onAdd: (product: Product, quantity?:
   }, [filters]);
 
   return (
-    <section id="shop" className="section-pad bg-vanilla px-4">
+    <section id="shop" className="container-pad section-pad bg-vanilla">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Shop" title="Self-tanning products, dressed like dessert." copy="Foaming body tan, gradual glow, face drops, body blur, prep, and tools for a beginner-friendly routine that feels salon-grade." />
 
         <div className="filter-panel">
-          <div className="grid gap-6">
+          <div className="grid gap-5 sm:gap-6">
             <FilterGroup label="Shade" values={shadeFilters} selected={filters.shade} onToggle={(value) => toggleFilter('shade', value)} />
             <FilterGroup label="Product type" values={typeFilters} selected={filters.category} onToggle={(value) => toggleFilter('category', value)} />
             <FilterGroup label="Development time" values={developmentFilters} selected={filters.developmentTime} onToggle={(value) => toggleFilter('developmentTime', value)} />
             <FilterGroup label="Scent" values={scentFilters} selected={filters.scent} onToggle={(value) => toggleFilter('scent', value)} />
             <FilterGroup label="Claims" values={claimFilters} selected={filters.claims} onToggle={(value) => toggleFilter('claims', value)} />
           </div>
-          <div className="min-w-[220px]">
+          <div className="w-full lg:w-auto">
             <Field label="Sort products">
               <SelectInput value={filters.sort} onChange={(event) => setFilters((current) => ({ ...current, sort: event.target.value as FilterState['sort'] }))}>
                 <option value="featured">Featured</option>
@@ -844,16 +973,16 @@ function ShopPage({ onAdd, onQuickView }: { onAdd: (product: Product, quantity?:
                 <option value="high">Price high to low</option>
               </SelectInput>
             </Field>
-            <button className="secondary-button mt-4 w-full min-h-11" onClick={() => setFilters(initialFilters)}>Reset filters</button>
+            <button className="secondary-button mt-4 min-h-11 w-full" onClick={() => setFilters(initialFilters)}>Reset filters</button>
           </div>
         </div>
 
-        <div className="mt-7 flex flex-wrap items-center justify-between gap-3">
-          <p className="font-mono text-sm font-medium uppercase text-accent">{filteredProducts.length} products</p>
-          <p className="text-sm font-bold text-charcoal/70">Transfer-resistant claim applies once fully developed, rinsed, and dry.</p>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 sm:mt-7">
+          <p className="font-mono text-xs font-medium uppercase tracking-wider text-accent sm:text-sm">{filteredProducts.length} products</p>
+          <p className="text-xs font-bold text-charcoal/70 sm:text-sm">Transfer-resistant claim applies once fully developed, rinsed, and dry.</p>
         </div>
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product) => <ProductCard key={product.id} product={product} onAdd={onAdd} onQuickView={onQuickView} />)}
         </div>
       </div>
@@ -884,18 +1013,23 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="quick-view-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div className="modal-card max-w-5xl">
-        <div className="grid gap-6 p-5 sm:p-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-lg border border-border bg-muted p-8">
+        <div className="grid gap-5 p-4 sm:gap-6 sm:p-6 md:grid-cols-[0.9fr_1.1fr] md:p-7 lg:p-8">
+          <div className="rounded-2xl border border-border bg-muted p-5 sm:p-6 md:p-8">
             <ProductRender product={product} size="hero" />
           </div>
-          <div>
-            <div className="flex items-start justify-between gap-4">
-              <div>
+          <div className="min-w-0">
+            <div className="flex items-start justify-between gap-3 sm:gap-4">
+              <div className="min-w-0 flex-1">
                 <p className="section-kicker">{product.category}</p>
-                <h2 id="quick-view-title" className="font-display text-4xl font-semibold leading-none text-cocoa">{product.name}</h2>
-                <p className="mt-2 text-lg font-bold text-charcoal/70">{product.type}</p>
+                <h2
+                  id="quick-view-title"
+                  className="font-display text-2xl font-semibold leading-tight text-cocoa sm:text-3xl lg:text-4xl"
+                >
+                  {product.name}
+                </h2>
+                <p className="mt-2 text-base font-bold text-charcoal/70 sm:text-lg">{product.type}</p>
               </div>
-              <button className="icon-button bg-white" onClick={onClose} aria-label="Close quick view"><X size={21} /></button>
+              <button className="icon-button shrink-0 bg-white" onClick={onClose} aria-label="Close quick view"><X size={21} /></button>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -912,7 +1046,7 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
               ].map(([label, value]) => (
                 <div key={label} className="rounded-[20px] bg-white/70 p-3">
                   <dt className="font-semibold text-foreground">{label}</dt>
-                  <dd className="mt-1 font-medium text-charcoal/70">{value}</dd>
+                  <dd className="mt-1 break-words font-medium text-charcoal/70">{value}</dd>
                 </div>
               ))}
             </dl>
@@ -921,9 +1055,9 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
               {product.claims.map((claim) => <span key={claim} className="mini-chip">{claim}</span>)}
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2 border-b border-caramel/10 pb-3">
+            <div className="mt-6 -mx-1 flex gap-2 overflow-x-auto border-b border-caramel/10 px-1 pb-3 sm:flex-wrap sm:overflow-visible">
               {(['Details', 'How to Use', 'Ingredients', 'Safety'] as const).map((item) => (
-                <button key={item} className={cx('tab-button', tab === item && 'tab-button-active')} onClick={() => setTab(item)}>
+                <button key={item} className={cx('tab-button shrink-0', tab === item && 'tab-button-active')} onClick={() => setTab(item)}>
                   {item}
                 </button>
               ))}
@@ -935,7 +1069,7 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
                 <ol className="grid gap-3">
                   {product.howToUse.map((step, index) => (
                     <li key={step} className="flex gap-3 rounded-[20px] bg-white/70 p-3">
-                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-accent text-sm font-semibold text-accent-foreground">{index + 1}</span>
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-accent text-sm font-semibold text-accent-foreground">{index + 1}</span>
                       {step}
                     </li>
                   ))}
@@ -947,7 +1081,7 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
                 </div>
               )}
               {tab === 'Safety' && (
-                <ul className="grid gap-2">
+                <ul className="grid gap-2 pl-4 [&>li]:list-disc">
                   {safetyNotes.map((note) => <li key={note}>{note}</li>)}
                   <li>Wash hands after application.</li>
                   <li>Self-tan does not contain SPF.</li>
@@ -958,12 +1092,12 @@ function QuickViewModal({ product, onClose, onAdd }: { product: Product | null; 
             </div>
 
             <div className="flex flex-col gap-3 rounded-[24px] bg-white/70 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-3 sm:justify-start">
                 <button className="quantity-button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity"><Minus size={18} /></button>
                 <span className="min-w-8 text-center text-lg font-semibold text-foreground">{quantity}</span>
                 <button className="quantity-button" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity"><Plus size={18} /></button>
               </div>
-              <button className="primary-button justify-center" onClick={() => onAdd(product, quantity)}>Add to Cart</button>
+              <button className="primary-button w-full justify-center sm:w-auto" onClick={() => onAdd(product, quantity)}>Add to Cart</button>
             </div>
           </div>
         </div>
@@ -1038,24 +1172,24 @@ function GlowQuiz({ onBook, onAddProducts }: { onBook: (service?: Service) => vo
   const estimated = recommendedProducts.reduce((sum, product) => sum + product.price, 0) + (service?.numericPrice ?? 0);
 
   return (
-    <section id="quiz" className="section-pad bg-muted px-4">
+    <section id="quiz" className="container-pad section-pad bg-muted">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <p className="section-kicker">Find My Glow</p>
-          <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Find My Glow</h2>
-          <p className="mt-5 max-w-xl text-lg font-medium leading-8 text-charcoal/75">
+          <h2 className="display-h2 mt-2">Find My Glow</h2>
+          <p className="mt-5 max-w-xl text-base font-medium leading-7 text-charcoal/75 sm:text-lg sm:leading-8">
             Match your event, skin tone, preferred format, and finish to a Sorbet Skin appointment or at-home product routine.
           </p>
         </div>
 
-        <div className="rounded-lg border border-border bg-card p-5 shadow-soft sm:p-7">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-soft sm:p-6 lg:p-7">
           {!complete ? (
             <>
               <div className="mb-5 h-2 overflow-hidden rounded-full bg-muted">
                 <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${((Object.keys(answers).length + 1) / quizQuestions.length) * 100}%` }} />
               </div>
               <p className="section-kicker">Question {step + 1} of {quizQuestions.length}</p>
-              <h3 className="mt-2 font-display text-3xl font-semibold text-cocoa">{current.label}</h3>
+              <h3 className="display-h3 mt-2">{current.label}</h3>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {current.options.map((option) => (
                   <button key={option} className="quiz-option" onClick={() => choose(option)}>
@@ -1063,14 +1197,21 @@ function GlowQuiz({ onBook, onAddProducts }: { onBook: (service?: Service) => vo
                   </button>
                 ))}
               </div>
-              {step > 0 && <button className="mt-5 text-sm font-semibold text-accent underline decoration-accent decoration-1 underline-offset-4" onClick={() => setStep((currentStep) => Math.max(0, currentStep - 1))}>Back one question</button>}
+              {step > 0 && (
+                <button
+                  className="mt-5 text-sm font-semibold text-accent underline decoration-accent decoration-1 underline-offset-4"
+                  onClick={() => setStep((currentStep) => Math.max(0, currentStep - 1))}
+                >
+                  Back one question
+                </button>
+              )}
             </>
           ) : result && (
             <div>
               <p className="section-kicker">Your recommendation</p>
-              <h3 className="font-display text-3xl font-semibold text-cocoa">{result.title}</h3>
+              <h3 className="display-h3 mt-1">{result.title}</h3>
               <p className="mt-3 text-sm font-medium leading-7 text-charcoal/75">{result.prep}</p>
-              <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {service && (
                   <div className="rounded-[24px] bg-buttercream/80 p-4">
                     <SprayCan className="text-caramel" />
@@ -1091,10 +1232,10 @@ function GlowQuiz({ onBook, onAddProducts }: { onBook: (service?: Service) => vo
                 <p className="mt-2 text-sm font-medium leading-6 text-charcoal/70">{result.prep}</p>
                 <p className="mt-3 text-lg font-semibold text-foreground">Estimated cost: {formatPrice(estimated)}</p>
               </div>
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <button className="primary-button justify-center" onClick={() => service ? onBook(service) : scrollToId('shop')}>Book recommended glow</button>
-                <button className="secondary-button justify-center" onClick={() => onAddProducts(result.ids)}>Add product routine to cart</button>
-                <button className="ghost-button justify-center" onClick={() => { setAnswers({}); setStep(0); }}>Retake</button>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <button className="primary-button w-full justify-center sm:w-auto" onClick={() => service ? onBook(service) : scrollToId('shop')}>Book recommended glow</button>
+                <button className="secondary-button w-full justify-center sm:w-auto" onClick={() => onAddProducts(result.ids)}>Add product routine to cart</button>
+                <button className="ghost-button w-full justify-center sm:w-auto" onClick={() => { setAnswers({}); setStep(0); }}>Retake</button>
               </div>
             </div>
           )}
@@ -1112,10 +1253,10 @@ function PrepCarePage() {
   const date = eventDate ? new Date(`${eventDate}T12:00:00`) : null;
 
   return (
-    <section id="prep-care" className="section-pad bg-warmwhite px-4">
+    <section id="prep-care" className="container-pad section-pad bg-warmwhite">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Prep & Care" title="Tan Prep & Care" copy="Good prep is the difference between a nice tan and a glow that looks expensive." />
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {[
             ['Before Your Tan', prepChecklist],
             ['Appointment Day', ['Arrive with clean, dry skin', 'No deodorant, perfume, oils, or moisturiser', 'Wear loose dark clothing', 'Bring slides or loose shoes']],
@@ -1124,8 +1265,8 @@ function PrepCarePage() {
             ['How to Extend Your Glow', ['Hydrate daily', 'Use Vanilla Veil for gradual glow', 'Use gentle cleanser', 'Avoid long hot baths', 'Pat skin dry']],
             ['What to Avoid', ['Heavy oils before dressing', 'Sweating before first rinse', 'Tight clothing after application', 'Harsh scrubs on fresh tan', 'Skipping SPF outdoors']],
           ].map(([title, items]) => (
-            <div key={title as string} className="soft-panel p-6">
-              <h3 className="font-display text-2xl font-semibold text-cocoa">{title as string}</h3>
+            <div key={title as string} className="soft-panel p-5 sm:p-6">
+              <h3 className="font-display text-xl font-semibold text-cocoa sm:text-2xl">{title as string}</h3>
               <div className="mt-4 grid gap-2">
                 {(items as string[]).map((item) => <div key={item} className="check-row"><Check size={17} /> {item}</div>)}
               </div>
@@ -1136,9 +1277,9 @@ function PrepCarePage() {
         <div className="calculator-panel mt-8">
           <div>
             <p className="section-kicker">Downloadable Checklist</p>
-            <h3 className="font-display text-3xl font-semibold text-cocoa">Tan Timeline Builder</h3>
+            <h3 className="display-h3 mt-1">Tan Timeline Builder</h3>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Field label="Event date"><TextInput type="date" value={eventDate} onChange={(event) => setEventDate(event.target.value)} /></Field>
             <Field label="Service type"><SelectInput value={serviceType} onChange={(event) => setServiceType(event.target.value)}>{services.map((service) => <option key={service.id}>{service.name}</option>)}</SelectInput></Field>
             <Field label="Skin dryness level"><SelectInput value={dryness} onChange={(event) => setDryness(event.target.value)}><option>Dry</option><option>Normal</option><option>Oily</option><option>Sensitive</option></SelectInput></Field>
@@ -1168,12 +1309,12 @@ function BeforeAfterSection() {
   const [tone, setTone] = useState(toneExamples[1]);
 
   return (
-    <section className="section-pad bg-vanilla px-4">
+    <section className="container-pad section-pad bg-vanilla">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.82fr_1.18fr]">
         <div>
           <p className="section-kicker">Before and after</p>
-          <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">A soft-focus glow comparison.</h2>
-          <p className="mt-5 text-lg font-medium leading-8 text-charcoal/75">Consent-safe generated skin-tone gradients show colour direction without using real client photos.</p>
+          <h2 className="display-h2 mt-2">A soft-focus glow comparison.</h2>
+          <p className="mt-5 text-base font-medium leading-7 text-charcoal/75 sm:text-lg sm:leading-8">Consent-safe generated skin-tone gradients show colour direction without using real client photos.</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {toneExamples.map((example) => (
               <button key={example.name} className={cx('filter-chip', tone.name === example.name && 'filter-chip-active')} onClick={() => setTone(example)}>
@@ -1187,11 +1328,19 @@ function BeforeAfterSection() {
           <div className="before-after" style={{ '--before-tone': tone.before, '--after-tone': tone.after, '--split': `${position}%` } as CSSProperties}>
             <div className="before-layer" />
             <div className="after-layer" />
-            <span className="ba-label left-4">Before</span>
-            <span className="ba-label right-4">After</span>
+            <span className="ba-label left-3 sm:left-4">Before</span>
+            <span className="ba-label right-3 sm:right-4">After</span>
             <div className="ba-handle" />
           </div>
-          <input className="mt-5 w-full accent-cocoa" type="range" min="15" max="85" value={position} onChange={(event) => setPosition(Number(event.target.value))} aria-label="Drag before and after comparison slider" />
+          <input
+            className="mt-5 h-11 w-full cursor-pointer accent-accent"
+            type="range"
+            min="15"
+            max="85"
+            value={position}
+            onChange={(event) => setPosition(Number(event.target.value))}
+            aria-label="Drag before and after comparison slider"
+          />
         </div>
       </div>
     </section>
@@ -1205,23 +1354,23 @@ function ReviewsSection() {
   const prev = () => setIndex((current) => (current - 1 + reviews.length) % reviews.length);
 
   return (
-    <section id="reviews" className="section-pad bg-muted px-4">
+    <section id="reviews" className="container-pad section-pad bg-muted">
       <div className="mx-auto max-w-5xl text-center">
         <p className="section-kicker">Reviews</p>
-        <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Five-star glow notes.</h2>
+        <h2 className="display-h2 mt-2">Five-star glow notes.</h2>
         <div className="review-card mt-8">
-          <div className="mx-auto flex w-fit items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground"><BadgeCheck size={17} /> Verified glow</div>
+          <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground"><BadgeCheck size={17} /> Verified glow</div>
           <div className="mt-5 flex justify-center"><Rating value={5} /></div>
-          <p className="mt-6 text-2xl font-medium leading-9 text-charcoal/80">"{review.text}"</p>
+          <p className="mt-6 text-lg font-medium leading-8 text-charcoal/80 sm:text-2xl sm:leading-9">"{review.text}"</p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             <span className="mini-chip">{review.serviceProduct}</span>
             <span className="mini-chip">Skin tone: {review.skinTone}</span>
             <span className="mini-chip">{review.eventType}</span>
           </div>
-          <p className="mt-5 font-display text-2xl font-semibold text-cocoa">{review.name}</p>
+          <p className="mt-5 font-display text-xl font-semibold text-cocoa sm:text-2xl">{review.name}</p>
           <div className="mt-6 flex items-center justify-center gap-3">
             <button className="icon-button bg-buttercream" onClick={prev} aria-label="Previous review"><ChevronLeft size={20} /></button>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {reviews.map((item, itemIndex) => <button key={item.name} className={cx('h-2.5 rounded-full transition-all', index === itemIndex ? 'w-8 bg-cocoa' : 'w-2.5 bg-caramel/30')} onClick={() => setIndex(itemIndex)} aria-label={`Show review ${itemIndex + 1}`} />)}
             </div>
             <button className="icon-button bg-buttercream" onClick={next} aria-label="Next review"><ChevronRight size={20} /></button>
@@ -1235,11 +1384,11 @@ function ReviewsSection() {
 function LocationContactSection() {
   const [submitted, setSubmitted] = useState(false);
   return (
-    <section id="contact" className="section-pad bg-warmwhite px-4">
+    <section id="contact" className="container-pad section-pad bg-warmwhite">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Location & contact" title="Melbourne studio location" copy="Appointment-only tanning with mobile service enquiries available by request." />
-        <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
-          <div className="soft-panel p-6">
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+          <div className="soft-panel p-5 sm:p-6">
             <div className="map-placeholder studio-map">
               <span>Melbourne studio location</span>
               <i className="pin pin-two" />
@@ -1248,13 +1397,13 @@ function LocationContactSection() {
               <div className="check-row"><MapPin size={17} /> Melbourne studio location</div>
               <div className="check-row"><Clock size={17} /> Monday to Sunday: 9:30am to 8:00pm</div>
               <div className="check-row"><CalendarDays size={17} /> Appointments outside standard hours available by request.</div>
-              <div className="check-row"><Mail size={17} /> hello@sorbetskin.example</div>
-              <div className="check-row"><Phone size={17} /> 0400 000 000</div>
+              <div className="check-row"><Mail size={17} /> <a href="mailto:hello@sorbetskin.example" className="break-all hover:text-accent">hello@sorbetskin.example</a></div>
+              <div className="check-row"><Phone size={17} /> <a href="tel:0400000000" className="hover:text-accent">0400 000 000</a></div>
               <div className="check-row"><Instagram size={17} /> @sorbetskin</div>
             </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <button className="primary-button min-h-11 px-5 py-2 text-sm">Directions</button>
-              <button className="secondary-button min-h-11 px-5 py-2 text-sm" onClick={() => scrollToId('mobile')}>Mobile service enquiry</button>
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <button className="primary-button min-h-11 w-full px-5 py-2 text-sm sm:w-auto">Directions</button>
+              <button className="secondary-button min-h-11 w-full px-5 py-2 text-sm sm:w-auto" onClick={() => scrollToId('mobile')}>Mobile service enquiry</button>
             </div>
           </div>
 
@@ -1267,12 +1416,12 @@ function LocationContactSection() {
           >
             <div>
               <p className="section-kicker">Contact form</p>
-              <h3 className="font-display text-3xl font-semibold text-cocoa">Ask us anything glow-related.</h3>
+              <h3 className="display-h3 mt-1">Ask us anything glow-related.</h3>
             </div>
             <Field label="Name"><TextInput required /></Field>
             <Field label="Email"><TextInput type="email" required /></Field>
             <Field label="Message"><TextArea placeholder="Event date, service, product question, or mobile enquiry..." /></Field>
-            {submitted ? <p className="success-message">Thanks. Your message has been received.</p> : <button className="primary-button w-fit">Send Message</button>}
+            {submitted ? <p className="success-message">Thanks. Your message has been received.</p> : <button className="primary-button w-full sm:w-fit">Send Message</button>}
           </form>
         </div>
       </div>
@@ -1289,12 +1438,12 @@ function GiftCertificates({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>,
   const price = option.id === 'gift-custom' ? custom : option.price;
 
   return (
-    <section id="gifts" className="section-pad bg-vanilla px-4">
+    <section id="gifts" className="container-pad section-pad bg-vanilla">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <p className="section-kicker">Gift certificates</p>
-          <h2 className="font-display text-5xl font-semibold leading-none text-cocoa">Give a glow that books itself.</h2>
-          <p className="mt-5 text-lg font-medium leading-8 text-charcoal/75">Choose a value, write the message, and add a mock digital gift certificate to cart.</p>
+          <h2 className="display-h2 mt-2">Give a glow that books itself.</h2>
+          <p className="mt-5 text-base font-medium leading-7 text-charcoal/75 sm:text-lg sm:leading-8">Choose a value, write the message, and add a mock digital gift certificate to cart.</p>
         </div>
         <form
           className="form-panel"
@@ -1310,7 +1459,7 @@ function GiftCertificates({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>,
             });
           }}
         >
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Gift value"><SelectInput value={selected} onChange={(event) => setSelected(event.target.value)}>{giftOptions.map((giftOption) => <option key={giftOption.id} value={giftOption.id}>{giftOption.name}</option>)}</SelectInput></Field>
             {selected === 'gift-custom' && <Field label="Custom amount"><TextInput type="number" min="25" value={custom} onChange={(event) => setCustom(Number(event.target.value))} /></Field>}
             <Field label="Recipient name"><TextInput value={recipient} onChange={(event) => setRecipient(event.target.value)} required /></Field>
@@ -1319,12 +1468,12 @@ function GiftCertificates({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>,
             <Field label="Message"><TextInput placeholder="A soft glow for your next big moment." /></Field>
           </div>
           <div className="quote-output">
-            <div>
+            <div className="min-w-0 flex-1">
               <span>Selected gift</span>
               <strong>{formatPrice(price)}</strong>
               <p>{option.name}</p>
             </div>
-            <button className="primary-button"><Gift size={20} /> Add Gift Certificate</button>
+            <button className="primary-button w-full sm:w-auto"><Gift size={20} /> Add Gift Certificate</button>
           </div>
         </form>
       </div>
@@ -1335,17 +1484,17 @@ function GiftCertificates({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>,
 function FAQSection() {
   const [open, setOpen] = useState(0);
   return (
-    <section id="faq" className="section-pad bg-warmwhite px-4">
+    <section id="faq" className="container-pad section-pad bg-warmwhite">
       <div className="mx-auto max-w-5xl">
         <SectionHeading eyebrow="FAQ" title="Glow questions, answered." copy="Product pages, service pages, FAQ, and footer all include SPF and safety guidance." />
         <div className="grid gap-3">
           {faqs.map((faq, index) => (
             <div key={faq.question} className="faq-item">
               <button className="faq-button" onClick={() => setOpen(open === index ? -1 : index)} aria-expanded={open === index}>
-                {faq.question}
-                <ChevronDown className={cx('transition', open === index && 'rotate-180')} size={20} />
+                <span className="flex-1 pr-3">{faq.question}</span>
+                <ChevronDown className={cx('shrink-0 transition-transform', open === index && 'rotate-180')} size={20} />
               </button>
-              {open === index && <p className="px-5 pb-5 text-sm font-medium leading-7 text-charcoal/70">{faq.answer}</p>}
+              {open === index && <p className="px-5 pb-5 text-sm font-medium leading-7 text-charcoal/70 sm:px-6">{faq.answer}</p>}
             </div>
           ))}
         </div>
@@ -1357,23 +1506,29 @@ function FAQSection() {
 function NewsletterSection() {
   const [success, setSuccess] = useState(false);
   return (
-    <section className="border-y border-border bg-foreground px-4 py-20 text-background">
+    <section className="container-pad border-y border-border bg-foreground py-14 text-background sm:py-20">
       <div className="mx-auto grid max-w-6xl items-center gap-6 md:grid-cols-[0.9fr_1.1fr]">
         <div>
-          <h2 className="font-display text-4xl font-normal leading-tight sm:text-5xl">Join the glow club.</h2>
-          <p className="mt-4 text-base font-normal leading-7 text-background/78">Get appointment reminders, glow tips, product drops, bridal timelines, and prep checklists.</p>
+          <h2 className="font-display font-normal leading-[1.05] sm:leading-tight" style={{ fontSize: 'clamp(1.875rem, 1rem + 3vw, 3rem)' }}>Join the glow club.</h2>
+          <p className="mt-4 text-base font-normal leading-7 text-background/80">Get appointment reminders, glow tips, product drops, bridal timelines, and prep checklists.</p>
         </div>
         <form
-          className="flex flex-col gap-3 rounded-lg border border-white/15 bg-white/10 p-3 sm:flex-row"
+          className="flex flex-col gap-3 rounded-full border border-white/15 bg-white/10 p-2 sm:flex-row sm:rounded-full sm:p-1.5"
           onSubmit={(event) => {
             event.preventDefault();
             setSuccess(true);
           }}
         >
-          <input className="min-h-11 flex-1 rounded-md border border-white/20 bg-white/95 px-5 font-normal text-foreground outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-foreground" type="email" placeholder="Email address" required />
-          <button className="rounded-md bg-accent px-6 py-3 font-semibold text-accent-foreground transition hover:bg-accent-secondary hover:text-foreground">Get glowing</button>
+          <input
+            className="min-h-12 flex-1 rounded-full border border-white/20 bg-white/95 px-5 text-base font-normal text-foreground outline-none placeholder:text-foreground/60 focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-foreground"
+            type="email"
+            placeholder="Email address"
+            required
+            aria-label="Email address"
+          />
+          <button className="min-h-12 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground transition hover:bg-accent-secondary hover:text-foreground sm:text-base">Get glowing</button>
         </form>
-        {success && <p className="md:col-start-2 rounded-md border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-background">You're in. Your glow routine just got an upgrade.</p>}
+        {success && <p className="rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-background md:col-start-2">You're in. Your glow routine just got an upgrade.</p>}
       </div>
     </section>
   );
@@ -1389,22 +1544,25 @@ function Footer() {
     ['Social', ['Instagram', 'TikTok', 'Pinterest', 'Reviews']],
   ];
   return (
-    <footer className="bg-vanilla px-4 py-12">
+    <footer
+      className="container-pad bg-vanilla py-10 sm:py-12"
+      style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}
+    >
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-8 lg:grid-cols-[1.2fr_2fr]">
           <div>
             <div className="flex items-center gap-3">
-              <span className="brand-mark">SS</span>
+              <span className="brand-mark" aria-hidden="true" />
               <div>
-                <p className="font-display text-3xl font-normal leading-none text-foreground">Sorbet Skin</p>
-                <p className="text-xs font-semibold uppercase text-accent">Whipped glow, zero sun damage.</p>
+                <p className="font-display text-2xl font-normal leading-tight text-foreground sm:text-3xl">Sorbet Skin</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-accent">Whipped glow, zero sun damage.</p>
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
-              {['Vegan', 'Cruelty-free', 'No fake tan smell'].map((badge) => <span key={badge} className="badge-pill" >{badge}</span>)}
+              {['Vegan', 'Cruelty-free', 'No fake tan smell'].map((badge) => <span key={badge} className="badge-pill">{badge}</span>)}
             </div>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
             {columns.map(([title, links]) => (
               <div key={title as string}>
                 <h3 className="footer-title">{title as string}</h3>
@@ -1413,7 +1571,7 @@ function Footer() {
             ))}
           </div>
         </div>
-        <div className="mt-10 rounded-lg border border-border bg-card p-5 text-xs font-normal leading-6 text-muted-foreground">
+        <div className="mt-10 rounded-2xl border border-border bg-card p-5 text-xs font-normal leading-6 text-muted-foreground sm:p-6">
           <p>Sorbet Skin self-tan products do not contain SPF and do not protect against UV exposure. Wear SPF daily. External use only. Patch test before use. Claims such as vegan, cruelty-free, transfer-resistant, naturally derived, and no fake tan smell should be verified through formulation testing and certification before commercial launch.</p>
           <p className="mt-3">External use only. Patch test before use. Avoid eyes and broken skin. Stop use if irritation occurs.</p>
           <p className="mt-3">Copyright 2026 Sorbet Skin. Original mock brand and website concept.</p>
@@ -1445,18 +1603,20 @@ function BookingModal({ service, open, onClose }: { service?: Service; open: boo
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="booking-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="modal-card max-w-4xl p-5 sm:p-8">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+      <div className="modal-card max-w-4xl p-5 sm:p-6 lg:p-8">
+        <div className="flex items-start justify-between gap-3 sm:gap-4">
+          <div className="min-w-0 flex-1">
             <p className="section-kicker">Mock booking</p>
-            <h2 id="booking-title" className="font-display text-4xl font-semibold leading-none text-cocoa">Choose Your Glow Appointment</h2>
+            <h2 id="booking-title" className="font-display text-2xl font-semibold leading-tight text-cocoa sm:text-3xl lg:text-4xl">
+              Choose Your Glow Appointment
+            </h2>
           </div>
-          <button className="icon-button bg-white" onClick={onClose} aria-label="Close booking modal"><X size={21} /></button>
+          <button className="icon-button shrink-0 bg-white" onClick={onClose} aria-label="Close booking modal"><X size={21} /></button>
         </div>
 
         {success ? (
-          <div className="mt-8 rounded-lg border border-accent/25 bg-accent/10 p-6">
-            <h3 className="font-display text-3xl font-semibold text-cocoa">Your glow request has been received.</h3>
+          <div className="mt-8 rounded-2xl border border-accent/25 bg-accent/10 p-5 sm:p-6">
+            <h3 className="display-h3">Your glow request has been received.</h3>
             <p className="mt-3 text-sm font-bold leading-7 text-charcoal/75">We will confirm your appointment shortly.</p>
           </div>
         ) : (
@@ -1467,10 +1627,10 @@ function BookingModal({ service, open, onClose }: { service?: Service; open: boo
               setSuccess(true);
             }}
           >
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Field label="Name"><TextInput required /></Field>
-              <Field label="Email"><TextInput type="email" required /></Field>
-              <Field label="Phone"><TextInput type="tel" required /></Field>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Field label="Name"><TextInput required autoComplete="name" /></Field>
+              <Field label="Email"><TextInput type="email" required autoComplete="email" /></Field>
+              <Field label="Phone"><TextInput type="tel" required autoComplete="tel" inputMode="tel" /></Field>
               <Field label="Service"><SelectInput value={selectedService} onChange={(event) => setSelectedService(event.target.value)}>{services.map((item) => <option key={item.id}>{item.name}</option>)}</SelectInput></Field>
               <Field label="Preferred date"><TextInput type="date" required /></Field>
               <Field label="Preferred time"><TextInput type="time" required /></Field>
@@ -1481,7 +1641,7 @@ function BookingModal({ service, open, onClose }: { service?: Service; open: boo
             </div>
             <Field label="Notes"><TextArea placeholder="Event type, rinse timing, allergies, mobile setup notes..." /></Field>
             <p className="text-xs font-bold leading-6 text-charcoal/70">{spfDisclaimer} External use only. Patch test before use.</p>
-            <button className="primary-button w-fit">Submit Glow Request</button>
+            <button className="primary-button w-full sm:w-fit">Submit Glow Request</button>
           </form>
         )}
       </div>
@@ -1490,6 +1650,22 @@ function BookingModal({ service, open, onClose }: { service?: Service; open: boo
 }
 
 function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, onCheckout }: { open: boolean; items: CartItem[]; onClose: () => void; onUpdate: (key: string, quantity: number) => void; onRemove: (key: string) => void; onAddProduct: (product: Product) => void; onCheckout: () => void }) {
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -1499,15 +1675,15 @@ function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, on
   return (
     <div className={cx('cart-overlay', open && 'cart-overlay-open')} aria-hidden={!open}>
       <div className="cart-scrim" onClick={onClose} />
-      <aside className={cx('cart-drawer', open && 'cart-drawer-open')} aria-label="Cart drawer">
-        <div className="flex items-start justify-between gap-4 border-b border-caramel/10 p-5">
-          <div>
+      <aside className={cx('cart-drawer', open && 'cart-drawer-open')} aria-label="Cart drawer" role="dialog" aria-modal="true">
+        <div className="flex items-start justify-between gap-3 border-b border-border p-4 sm:gap-4 sm:p-5">
+          <div className="min-w-0 flex-1">
             <p className="section-kicker">Your cart</p>
-            <h2 className="font-display text-3xl font-semibold text-cocoa">Glow bag</h2>
+            <h2 className="font-display text-2xl font-semibold text-cocoa sm:text-3xl">Glow bag</h2>
           </div>
-          <button className="icon-button bg-buttercream" onClick={onClose} aria-label="Close cart"><X size={21} /></button>
+          <button className="icon-button shrink-0 bg-buttercream" onClick={onClose} aria-label="Close cart"><X size={21} /></button>
         </div>
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5" style={{ WebkitOverflowScrolling: 'touch' }}>
           {items.length === 0 ? (
             <div className="rounded-[28px] bg-buttercream/70 p-6 text-center">
               <ShoppingBag className="mx-auto text-caramel" />
@@ -1517,42 +1693,42 @@ function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, on
             <div className="grid gap-3">
               {items.map((item) => (
                 <div key={item.key} className="cart-line">
-                  <div className="cart-line-icon" style={{ backgroundColor: item.accent ?? '#F5F3F0' }}><PackageCheck size={18} /></div>
+                  <div className="cart-line-icon" style={{ backgroundColor: item.accent ?? '#FBE9DF' }}><PackageCheck size={18} /></div>
                   <div className="min-w-0 flex-1">
                     <h3>{item.name}</h3>
                     {item.meta && <p>{item.meta}</p>}
                     <span>{formatPrice(item.price)}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button className="quantity-button" onClick={() => onUpdate(item.key, Math.max(1, item.quantity - 1))} aria-label={`Decrease ${item.name}`}><Minus size={15} /></button>
                     <span className="w-5 text-center text-sm font-semibold text-foreground">{item.quantity}</span>
                     <button className="quantity-button" onClick={() => onUpdate(item.key, item.quantity + 1)} aria-label={`Increase ${item.name}`}><Plus size={15} /></button>
                   </div>
-                  <button className="icon-button h-9 w-9 bg-white" onClick={() => onRemove(item.key)} aria-label={`Remove ${item.name}`}><Trash2 size={16} /></button>
+                  <button className="icon-button h-9 w-9 shrink-0 bg-white" onClick={() => onRemove(item.key)} aria-label={`Remove ${item.name}`}><Trash2 size={16} /></button>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="mt-6 rounded-[24px] bg-white/75 p-4">
+          <div className="mt-6 rounded-2xl bg-white/75 p-4">
             <div className="flex justify-between text-sm font-semibold text-foreground"><span>Free shipping progress</span><span>{subtotal >= 80 ? 'Unlocked' : `${formatPrice(80 - subtotal)} to go`}</span></div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} /></div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-accent transition-all" style={{ width: `${progress}%` }} /></div>
           </div>
 
           <div className="mt-6">
-            <h3 className="font-mono text-sm font-medium uppercase text-foreground">Suggested upsells</h3>
+            <h3 className="font-mono text-xs font-medium uppercase tracking-wider text-foreground">Suggested upsells</h3>
             <div className="mt-3 grid gap-3">
               {upsells.map((product) => (
                 <button key={product.id} className="upsell-row" onClick={() => onAddProduct(product)}>
                   <ProductRender product={product} size="xs" />
-                  <span>{product.name}</span>
-                  <strong>{formatPrice(product.price)}</strong>
+                  <span className="min-w-0 truncate text-left">{product.name}</span>
+                  <strong className="shrink-0">{formatPrice(product.price)}</strong>
                 </button>
               ))}
             </div>
           </div>
         </div>
-        <div className="border-t border-caramel/10 p-5">
+        <div className="border-t border-border p-4 sm:p-5">
           <div className="flex items-center justify-between text-lg font-semibold text-foreground"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
           <button className="primary-button mt-4 w-full justify-center" onClick={onCheckout}>Mock checkout</button>
         </div>
@@ -1562,7 +1738,16 @@ function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, on
 }
 
 function Toast({ message }: { message: string }) {
-  return <div className="toast"><Sparkles size={18} /> {message}</div>;
+  return (
+    <div
+      className="toast"
+      role="status"
+      aria-live="polite"
+      style={{ bottom: 'max(1.2rem, calc(env(safe-area-inset-bottom) + 1rem))' }}
+    >
+      <Sparkles size={18} /> {message}
+    </div>
+  );
 }
 
 export default function App() {
@@ -1628,7 +1813,13 @@ export default function App() {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-vanilla font-body text-charcoal">
+    <div className="min-h-screen bg-vanilla font-body text-charcoal" style={{ minHeight: '100svh' }}>
+      <a
+        href="#top"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-foreground focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      >
+        Skip to content
+      </a>
       <div className="sticky top-0 z-50">
         <AnnouncementBar />
         <Header cartCount={cartCount} onCartOpen={() => setCartOpen(true)} onBook={() => openBooking()} />
