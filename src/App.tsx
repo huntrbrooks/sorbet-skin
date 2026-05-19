@@ -94,6 +94,33 @@ function formatPrice(amount: number) {
   return `$${amount.toFixed(amount % 1 ? 2 : 0)} AUD`;
 }
 
+type LeadType = 'booking' | 'contact' | 'newsletter' | 'bridal' | 'competition' | 'mobile' | 'gift';
+
+type CheckoutState = 'idle' | 'loading' | 'error';
+
+async function submitLead(type: LeadType, payload: Record<string, unknown>) {
+  const response = await fetch('/api/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, payload }),
+  });
+
+  const result = (await response.json().catch(() => ({}))) as { error?: string };
+
+  if (!response.ok) {
+    throw new Error(result.error ?? 'Unable to save your details. Please try again.');
+  }
+}
+
+function formPayload(form: HTMLFormElement) {
+  return Object.fromEntries(new FormData(form).entries());
+}
+
+function catalogIdFromCartKey(item: CartItem) {
+  const parts = item.key.split(':');
+  return parts[1] ?? item.key;
+}
+
 function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -276,7 +303,7 @@ function Header({ cartCount, onCartOpen, onBook }: { cartCount: number; onCartOp
 }
 
 function Hero({ onBook }: { onBook: () => void }) {
-  const badges = ['5-star glow experience', 'Vegan', 'Cruelty-free', 'No fake tan smell', 'Streak-free', 'Bridal-ready', 'Mobile tanning available'];
+  const badges = ['Vegan bodycare', 'Cruelty-free glow', 'Dessert-inspired scents', 'No fake tan smell', 'Shop bundles', 'Studio tans', 'Mobile tanning'];
   const heroProducts = ['peach-glaze', 'cocoa-drip', 'honey-dew-drops'].map(productById);
 
   return (
@@ -288,19 +315,19 @@ function Hero({ onBook }: { onBook: () => void }) {
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="animate-fadeUp">
           <h1 className="max-w-4xl font-display text-5xl font-normal leading-tight text-foreground sm:text-6xl lg:text-7xl">
-            Melbourne's softest spray tan and whipped self-tan glow.
+            Vegan, cruelty-free bodycare for your juiciest glow.
           </h1>
           <p className="mt-6 max-w-2xl text-lg font-normal leading-8 text-muted-foreground sm:text-xl">
-            Expert studio tans, mobile appointments, bridal bronze, competition colour, and dessert-soft at-home self-tanning products designed for a streak-free glow without the fake tan smell.
+            Whipped self-tan, body butters, lip balms, cleansers, masks, studio spray tans, and mobile glow appointments wrapped in bright sorbet colour.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <button className="primary-button" onClick={onBook}>
-              <CalendarDays size={20} />
-              Book Your Tan
+            <button className="primary-button" onClick={() => scrollToId('shop')}>
+              <ShoppingBag size={20} />
+              Shop Best Sellers
             </button>
             <button className="secondary-button" onClick={() => scrollToId('shop')}>
-              Shop Sorbet Skin
+              Build a Bundle
             </button>
             <button className="ghost-button" onClick={() => scrollToId('quiz')}>
               Find My Glow
@@ -321,7 +348,7 @@ function Hero({ onBook }: { onBook: () => void }) {
 
         <div className="relative min-h-[440px] sm:min-h-[560px]">
           <div className="hero-image-card">
-            <img src="/assets/sorbet-product-line.svg" alt="Sorbet Skin original ribbed-cap self-tanning product range" />
+            <img src="/assets/generated/sorbet-hero-lifestyle.png" alt="Sorbet Skin colourful self-tan and whipped bodycare collection on a bright bathroom counter" />
             <div className="hero-shine" />
           </div>
           <div className="absolute -left-2 bottom-8 hidden rotate-[-8deg] sm:block">
@@ -360,6 +387,36 @@ function SocialProofStrip() {
             <span>{label}</span>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function BestSellersStory({ onAdd, onQuickView }: { onAdd: (product: Product, quantity?: number) => void; onQuickView: (product: Product) => void }) {
+  const heroProducts = ['peach-glaze', 'vanilla-veil', 'raspberry-body-butter', 'honey-dew-drops']
+    .map((id) => productMap.get(id))
+    .filter(Boolean) as Product[];
+  const displayProducts = heroProducts.length >= 4 ? heroProducts : products.slice(0, 4);
+
+  return (
+    <section className="section-pad bg-buttercream px-4">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid items-end gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <SectionHeading
+            align="left"
+            eyebrow="Shop the best sellers"
+            title="Bodycare, but make it fun."
+            copy="Sorbet-bright formulas, glossy product moments, and add-to-cart routines designed to feel like a treat from first click."
+          />
+          <div className="editorial-product-frame">
+            <img src="/assets/generated/sorbet-product-collection.png" alt="Sorbet Skin bodycare range arranged on a colourful pastel ecommerce set" />
+          </div>
+        </div>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {displayProducts.map((product) => (
+            <ProductCard key={product.id} product={product} onAdd={onAdd} onQuickView={onQuickView} />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -525,6 +582,8 @@ function PackagesSection({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>, 
 
 function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   return (
     <section id="bridal" className="section-pad bg-warmwhite px-4">
@@ -541,7 +600,7 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
             </button>
           </div>
           <div className="editorial-skin-frame bridal-skin">
-            <img src="/assets/bridal-glow-editorial.svg" alt="Soft bridal spray tan glow editorial with Sorbet Skin product" />
+            <img src="/assets/generated/sorbet-bridal-service.png" alt="Sorbet Skin warm bridal and spray tanning service editorial" />
           </div>
         </div>
 
@@ -586,9 +645,18 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
 
         <form
           className="form-panel mt-8"
-          onSubmit={(event) => {
+          onSubmit={async (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            setSubmitted(true);
+            setSubmitting(true);
+            setError('');
+            try {
+              await submitLead('bridal', formPayload(event.currentTarget));
+              setSubmitted(true);
+            } catch (submitError) {
+              setError(submitError instanceof Error ? submitError.message : 'Unable to send your bridal request.');
+            } finally {
+              setSubmitting(false);
+            }
           }}
         >
           <div>
@@ -596,14 +664,17 @@ function BridalPage({ onBook }: { onBook: (service?: Service) => void }) {
             <h3 className="font-display text-3xl font-semibold text-cocoa">Plan the bridal party glow.</h3>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Field label="Wedding date"><TextInput type="date" required /></Field>
-            <Field label="Location"><TextInput placeholder="Suburb or venue" required /></Field>
-            <Field label="Bridal party size"><TextInput type="number" min="1" placeholder="5" /></Field>
-            <Field label="Dress colour"><TextInput placeholder="Ivory, white, blush..." /></Field>
-            <Field label="Skin tone"><SelectInput><option>Fair</option><option>Light</option><option>Medium</option><option>Olive</option><option>Deep</option></SelectInput></Field>
-            <Field label="Desired colour"><SelectInput><option>Soft bridal glow</option><option>Golden bronze</option><option>Deeper bronze</option></SelectInput></Field>
+            <Field label="Name"><TextInput name="name" required /></Field>
+            <Field label="Email"><TextInput name="email" type="email" required /></Field>
+            <Field label="Wedding date"><TextInput name="weddingDate" type="date" required /></Field>
+            <Field label="Location"><TextInput name="location" placeholder="Suburb or venue" required /></Field>
+            <Field label="Bridal party size"><TextInput name="partySize" type="number" min="1" placeholder="5" /></Field>
+            <Field label="Dress colour"><TextInput name="dressColour" placeholder="Ivory, white, blush..." /></Field>
+            <Field label="Skin tone"><SelectInput name="skinTone"><option>Fair</option><option>Light</option><option>Medium</option><option>Olive</option><option>Deep</option></SelectInput></Field>
+            <Field label="Desired colour"><SelectInput name="desiredColour"><option>Soft bridal glow</option><option>Golden bronze</option><option>Deeper bronze</option></SelectInput></Field>
           </div>
-          {submitted ? <p className="success-message">Your bridal glow request has been received. We will be in touch with a tailored quote.</p> : <button className="primary-button w-fit">Request Bridal Quote</button>}
+          {error && <p className="error-message">{error}</p>}
+          {submitted ? <p className="success-message">Your bridal glow request has been received. We will be in touch with a tailored quote.</p> : <button className="primary-button w-fit" disabled={submitting}>{submitting ? 'Sending...' : 'Request Bridal Quote'}</button>}
         </form>
       </div>
     </section>
@@ -683,6 +754,8 @@ function MobileTanningPage({ onBook }: { onBook: (service?: Service) => void }) 
 
 function CompetitionPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   return (
     <section id="competition" className="section-pad bg-warmwhite px-4">
@@ -719,9 +792,18 @@ function CompetitionPage() {
 
         <form
           className="form-panel mt-8"
-          onSubmit={(event) => {
+          onSubmit={async (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            setSubmitted(true);
+            setSubmitting(true);
+            setError('');
+            try {
+              await submitLead('competition', formPayload(event.currentTarget));
+              setSubmitted(true);
+            } catch (submitError) {
+              setError(submitError instanceof Error ? submitError.message : 'Unable to send your competition request.');
+            } finally {
+              setSubmitting(false);
+            }
           }}
         >
           <div>
@@ -729,13 +811,14 @@ function CompetitionPage() {
             <h3 className="font-display text-3xl font-semibold text-cocoa">Tell us about the event.</h3>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Field label="Name"><TextInput required /></Field>
-            <Field label="Email"><TextInput type="email" required /></Field>
-            <Field label="Event type"><SelectInput><option>Fitness</option><option>Dance</option><option>Pageant</option><option>Performance</option></SelectInput></Field>
-            <Field label="Event date"><TextInput type="date" required /></Field>
+            <Field label="Name"><TextInput name="name" required /></Field>
+            <Field label="Email"><TextInput name="email" type="email" required /></Field>
+            <Field label="Event type"><SelectInput name="eventType"><option>Fitness</option><option>Dance</option><option>Pageant</option><option>Performance</option></SelectInput></Field>
+            <Field label="Event date"><TextInput name="eventDate" type="date" required /></Field>
           </div>
-          <Field label="Notes"><TextArea placeholder="Show time, category, costume colour, preferred depth..." /></Field>
-          {submitted ? <p className="success-message">Your competition bronze request has been received. We will confirm timing shortly.</p> : <button className="primary-button w-fit">Request Competition Booking</button>}
+          <Field label="Notes"><TextArea name="notes" placeholder="Show time, category, costume colour, preferred depth..." /></Field>
+          {error && <p className="error-message">{error}</p>}
+          {submitted ? <p className="success-message">Your competition bronze request has been received. We will confirm timing shortly.</p> : <button className="primary-button w-fit" disabled={submitting}>{submitting ? 'Sending...' : 'Request Competition Booking'}</button>}
         </form>
       </div>
     </section>
@@ -1234,6 +1317,8 @@ function ReviewsSection() {
 
 function LocationContactSection() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   return (
     <section id="contact" className="section-pad bg-warmwhite px-4">
       <div className="mx-auto max-w-7xl">
@@ -1260,19 +1345,29 @@ function LocationContactSection() {
 
           <form
             className="form-panel"
-            onSubmit={(event) => {
+            onSubmit={async (event: FormEvent<HTMLFormElement>) => {
               event.preventDefault();
-              setSubmitted(true);
+              setSubmitting(true);
+              setError('');
+              try {
+                await submitLead('contact', formPayload(event.currentTarget));
+                setSubmitted(true);
+              } catch (submitError) {
+                setError(submitError instanceof Error ? submitError.message : 'Unable to send your message.');
+              } finally {
+                setSubmitting(false);
+              }
             }}
           >
             <div>
               <p className="section-kicker">Contact form</p>
               <h3 className="font-display text-3xl font-semibold text-cocoa">Ask us anything glow-related.</h3>
             </div>
-            <Field label="Name"><TextInput required /></Field>
-            <Field label="Email"><TextInput type="email" required /></Field>
-            <Field label="Message"><TextArea placeholder="Event date, service, product question, or mobile enquiry..." /></Field>
-            {submitted ? <p className="success-message">Thanks. Your message has been received.</p> : <button className="primary-button w-fit">Send Message</button>}
+            <Field label="Name"><TextInput name="name" required /></Field>
+            <Field label="Email"><TextInput name="email" type="email" required /></Field>
+            <Field label="Message"><TextArea name="message" placeholder="Event date, service, product question, or mobile enquiry..." /></Field>
+            {error && <p className="error-message">{error}</p>}
+            {submitted ? <p className="success-message">Thanks. Your message has been received.</p> : <button className="primary-button w-fit" disabled={submitting}>{submitting ? 'Sending...' : 'Send Message'}</button>}
           </form>
         </div>
       </div>
@@ -1285,6 +1380,9 @@ function GiftCertificates({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>,
   const [custom, setCustom] = useState(75);
   const [recipient, setRecipient] = useState('');
   const [sender, setSender] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const option = giftOptions.find((giftOption) => giftOption.id === selected) ?? giftOptions[0];
   const price = option.id === 'gift-custom' ? custom : option.price;
 
@@ -1298,33 +1396,45 @@ function GiftCertificates({ onAdd }: { onAdd: (item: Omit<CartItem, 'quantity'>,
         </div>
         <form
           className="form-panel"
-          onSubmit={(event) => {
+          onSubmit={async (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            onAdd({
-              key: `gift:${selected}:${recipient}:${sender}:${price}`,
-              kind: 'gift',
-              name: option.name,
-              price,
-              meta: `To ${recipient || 'recipient'} from ${sender || 'sender'}`,
-              accent: '#B8860B',
-            });
+            setSubmitting(true);
+            setError('');
+            try {
+              await submitLead('gift', { ...formPayload(event.currentTarget), giftId: selected, price });
+              onAdd({
+                key: `gift:${selected}:${recipient}:${sender}:${price}`,
+                kind: 'gift',
+                name: option.name,
+                price,
+                meta: `To ${recipient || 'recipient'} from ${sender || 'sender'}`,
+                accent: '#FF9FB8',
+              });
+              setSubmitted(true);
+            } catch (submitError) {
+              setError(submitError instanceof Error ? submitError.message : 'Unable to save the gift details.');
+            } finally {
+              setSubmitting(false);
+            }
           }}
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Gift value"><SelectInput value={selected} onChange={(event) => setSelected(event.target.value)}>{giftOptions.map((giftOption) => <option key={giftOption.id} value={giftOption.id}>{giftOption.name}</option>)}</SelectInput></Field>
-            {selected === 'gift-custom' && <Field label="Custom amount"><TextInput type="number" min="25" value={custom} onChange={(event) => setCustom(Number(event.target.value))} /></Field>}
-            <Field label="Recipient name"><TextInput value={recipient} onChange={(event) => setRecipient(event.target.value)} required /></Field>
-            <Field label="Sender name"><TextInput value={sender} onChange={(event) => setSender(event.target.value)} required /></Field>
-            <Field label="Delivery method"><SelectInput><option>Email certificate</option><option>Print-ready PDF</option><option>Send later</option></SelectInput></Field>
-            <Field label="Message"><TextInput placeholder="A soft glow for your next big moment." /></Field>
+            <Field label="Gift value"><SelectInput name="giftValue" value={selected} onChange={(event) => setSelected(event.target.value)}>{giftOptions.map((giftOption) => <option key={giftOption.id} value={giftOption.id}>{giftOption.name}</option>)}</SelectInput></Field>
+            {selected === 'gift-custom' && <Field label="Custom amount"><TextInput name="customAmount" type="number" min="25" value={custom} onChange={(event) => setCustom(Number(event.target.value))} /></Field>}
+            <Field label="Recipient name"><TextInput name="recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} required /></Field>
+            <Field label="Sender name"><TextInput name="sender" value={sender} onChange={(event) => setSender(event.target.value)} required /></Field>
+            <Field label="Delivery method"><SelectInput name="deliveryMethod"><option>Email certificate</option><option>Print-ready PDF</option><option>Send later</option></SelectInput></Field>
+            <Field label="Message"><TextInput name="message" placeholder="A soft glow for your next big moment." /></Field>
           </div>
+          {error && <p className="error-message">{error}</p>}
+          {submitted && <p className="success-message">Gift details saved and added to cart.</p>}
           <div className="quote-output">
             <div>
               <span>Selected gift</span>
               <strong>{formatPrice(price)}</strong>
               <p>{option.name}</p>
             </div>
-            <button className="primary-button"><Gift size={20} /> Add Gift Certificate</button>
+            <button className="primary-button" disabled={submitting}><Gift size={20} /> {submitting ? 'Saving...' : 'Add Gift Certificate'}</button>
           </div>
         </form>
       </div>
@@ -1356,6 +1466,8 @@ function FAQSection() {
 
 function NewsletterSection() {
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   return (
     <section className="border-y border-border bg-foreground px-4 py-20 text-background">
       <div className="mx-auto grid max-w-6xl items-center gap-6 md:grid-cols-[0.9fr_1.1fr]">
@@ -1365,14 +1477,24 @@ function NewsletterSection() {
         </div>
         <form
           className="flex flex-col gap-3 rounded-lg border border-white/15 bg-white/10 p-3 sm:flex-row"
-          onSubmit={(event) => {
+          onSubmit={async (event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            setSuccess(true);
+            setSubmitting(true);
+            setError('');
+            try {
+              await submitLead('newsletter', formPayload(event.currentTarget));
+              setSuccess(true);
+            } catch (submitError) {
+              setError(submitError instanceof Error ? submitError.message : 'Unable to join the list.');
+            } finally {
+              setSubmitting(false);
+            }
           }}
         >
-          <input className="min-h-11 flex-1 rounded-md border border-white/20 bg-white/95 px-5 font-normal text-foreground outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-foreground" type="email" placeholder="Email address" required />
-          <button className="rounded-md bg-accent px-6 py-3 font-semibold text-accent-foreground transition hover:bg-accent-secondary hover:text-foreground">Get glowing</button>
+          <input name="email" className="min-h-11 flex-1 rounded-md border border-white/20 bg-white/95 px-5 font-normal text-foreground outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-foreground" type="email" placeholder="Email address" required />
+          <button className="rounded-md bg-accent px-6 py-3 font-semibold text-accent-foreground transition hover:bg-accent-secondary hover:text-foreground" disabled={submitting}>{submitting ? 'Joining...' : 'Get glowing'}</button>
         </form>
+        {error && <p className="md:col-start-2 rounded-md border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-background">{error}</p>}
         {success && <p className="md:col-start-2 rounded-md border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-background">You're in. Your glow routine just got an upgrade.</p>}
       </div>
     </section>
@@ -1426,11 +1548,15 @@ function Footer() {
 function BookingModal({ service, open, onClose }: { service?: Service; open: boolean; onClose: () => void }) {
   const [selectedService, setSelectedService] = useState(service?.name ?? services[0].name);
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (open) {
       setSelectedService(service?.name ?? services[0].name);
       setSuccess(false);
+      setSubmitting(false);
+      setError('');
     }
   }, [open, service]);
 
@@ -1448,7 +1574,7 @@ function BookingModal({ service, open, onClose }: { service?: Service; open: boo
       <div className="modal-card max-w-4xl p-5 sm:p-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="section-kicker">Mock booking</p>
+            <p className="section-kicker">Book online</p>
             <h2 id="booking-title" className="font-display text-4xl font-semibold leading-none text-cocoa">Choose Your Glow Appointment</h2>
           </div>
           <button className="icon-button bg-white" onClick={onClose} aria-label="Close booking modal"><X size={21} /></button>
@@ -1462,26 +1588,36 @@ function BookingModal({ service, open, onClose }: { service?: Service; open: boo
         ) : (
           <form
             className="mt-6 grid gap-4"
-            onSubmit={(event: FormEvent) => {
+            onSubmit={async (event: FormEvent<HTMLFormElement>) => {
               event.preventDefault();
-              setSuccess(true);
+              setSubmitting(true);
+              setError('');
+              try {
+                await submitLead('booking', formPayload(event.currentTarget));
+                setSuccess(true);
+              } catch (submitError) {
+                setError(submitError instanceof Error ? submitError.message : 'Unable to save your booking request.');
+              } finally {
+                setSubmitting(false);
+              }
             }}
           >
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Field label="Name"><TextInput required /></Field>
-              <Field label="Email"><TextInput type="email" required /></Field>
-              <Field label="Phone"><TextInput type="tel" required /></Field>
-              <Field label="Service"><SelectInput value={selectedService} onChange={(event) => setSelectedService(event.target.value)}>{services.map((item) => <option key={item.id}>{item.name}</option>)}</SelectInput></Field>
-              <Field label="Preferred date"><TextInput type="date" required /></Field>
-              <Field label="Preferred time"><TextInput type="time" required /></Field>
-              <Field label="Studio or mobile"><SelectInput><option>Studio</option><option>Mobile</option></SelectInput></Field>
-              <Field label="Event date"><TextInput type="date" /></Field>
-              <Field label="Skin tone"><SelectInput><option>Fair</option><option>Light</option><option>Medium</option><option>Olive</option><option>Deep</option></SelectInput></Field>
-              <Field label="Desired colour depth"><SelectInput><option>Subtle glow</option><option>Golden bronze</option><option>Deep bronze</option><option>Competition bronze</option></SelectInput></Field>
+              <Field label="Name"><TextInput name="name" required /></Field>
+              <Field label="Email"><TextInput name="email" type="email" required /></Field>
+              <Field label="Phone"><TextInput name="phone" type="tel" required /></Field>
+              <Field label="Service"><SelectInput name="service" value={selectedService} onChange={(event) => setSelectedService(event.target.value)}>{services.map((item) => <option key={item.id}>{item.name}</option>)}</SelectInput></Field>
+              <Field label="Preferred date"><TextInput name="preferredDate" type="date" required /></Field>
+              <Field label="Preferred time"><TextInput name="preferredTime" type="time" required /></Field>
+              <Field label="Studio or mobile"><SelectInput name="locationType"><option>Studio</option><option>Mobile</option></SelectInput></Field>
+              <Field label="Event date"><TextInput name="eventDate" type="date" /></Field>
+              <Field label="Skin tone"><SelectInput name="skinTone"><option>Fair</option><option>Light</option><option>Medium</option><option>Olive</option><option>Deep</option></SelectInput></Field>
+              <Field label="Desired colour depth"><SelectInput name="desiredDepth"><option>Subtle glow</option><option>Golden bronze</option><option>Deep bronze</option><option>Competition bronze</option></SelectInput></Field>
             </div>
-            <Field label="Notes"><TextArea placeholder="Event type, rinse timing, allergies, mobile setup notes..." /></Field>
+            <Field label="Notes"><TextArea name="notes" placeholder="Event type, rinse timing, allergies, mobile setup notes..." /></Field>
             <p className="text-xs font-bold leading-6 text-charcoal/70">{spfDisclaimer} External use only. Patch test before use.</p>
-            <button className="primary-button w-fit">Submit Glow Request</button>
+            {error && <p className="error-message">{error}</p>}
+            <button className="primary-button w-fit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Glow Request'}</button>
           </form>
         )}
       </div>
@@ -1489,7 +1625,27 @@ function BookingModal({ service, open, onClose }: { service?: Service; open: boo
   );
 }
 
-function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, onCheckout }: { open: boolean; items: CartItem[]; onClose: () => void; onUpdate: (key: string, quantity: number) => void; onRemove: (key: string) => void; onAddProduct: (product: Product) => void; onCheckout: () => void }) {
+function CartDrawer({
+  open,
+  items,
+  onClose,
+  onUpdate,
+  onRemove,
+  onAddProduct,
+  onCheckout,
+  checkoutState,
+  checkoutError,
+}: {
+  open: boolean;
+  items: CartItem[];
+  onClose: () => void;
+  onUpdate: (key: string, quantity: number) => void;
+  onRemove: (key: string) => void;
+  onAddProduct: (product: Product) => void;
+  onCheckout: () => void;
+  checkoutState: CheckoutState;
+  checkoutError: string;
+}) {
   if (!open) return null;
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -1554,7 +1710,10 @@ function CartDrawer({ open, items, onClose, onUpdate, onRemove, onAddProduct, on
         </div>
         <div className="border-t border-caramel/10 p-5">
           <div className="flex items-center justify-between text-lg font-semibold text-foreground"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-          <button className="primary-button mt-4 w-full justify-center" onClick={onCheckout}>Mock checkout</button>
+          {checkoutError && <p className="error-message mt-4">{checkoutError}</p>}
+          <button className="primary-button mt-4 w-full justify-center" onClick={onCheckout} disabled={checkoutState === 'loading' || items.length === 0}>
+            {checkoutState === 'loading' ? 'Opening secure checkout...' : 'Secure checkout'}
+          </button>
         </div>
       </aside>
     </div>
@@ -1579,6 +1738,8 @@ export default function App() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingService, setBookingService] = useState<Service | undefined>();
   const [toast, setToast] = useState('');
+  const [checkoutState, setCheckoutState] = useState<CheckoutState>('idle');
+  const [checkoutError, setCheckoutError] = useState('');
 
   useEffect(() => {
     localStorage.setItem(cartStorageKey, JSON.stringify(cart));
@@ -1589,6 +1750,20 @@ export default function App() {
     const timer = window.setTimeout(() => setToast(''), 2600);
     return () => window.clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get('checkout');
+    if (checkout === 'success') {
+      setCart([]);
+      setToast('Payment received. Your Sorbet Skin order is confirmed.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    if (checkout === 'cancelled') {
+      setToast('Checkout cancelled. Your glow bag is still saved.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const addLine = (item: Omit<CartItem, 'quantity'>, quantity = 1) => {
     setCart((current) => {
@@ -1625,6 +1800,35 @@ export default function App() {
     setBookingOpen(true);
   };
 
+  const startCheckout = async () => {
+    setCheckoutState('loading');
+    setCheckoutError('');
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart.map((item) => ({
+            id: catalogIdFromCartKey(item),
+            quantity: item.quantity,
+            meta: item.meta,
+            amount: catalogIdFromCartKey(item) === 'gift-custom' ? item.price : undefined,
+          })),
+        }),
+      });
+      const result = (await response.json().catch(() => ({}))) as { url?: string; error?: string };
+
+      if (!response.ok || !result.url) {
+        throw new Error(result.error ?? 'Unable to open secure checkout.');
+      }
+
+      window.location.href = result.url;
+    } catch (error) {
+      setCheckoutState('error');
+      setCheckoutError(error instanceof Error ? error.message : 'Unable to open secure checkout.');
+    }
+  };
+
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -1637,13 +1841,14 @@ export default function App() {
       <main>
         <Hero onBook={() => openBooking()} />
         <SocialProofStrip />
+        <BestSellersStory onAdd={addProduct} onQuickView={setQuickViewProduct} />
+        <ShopPage onAdd={addProduct} onQuickView={setQuickViewProduct} />
         <BookingPanel onBook={openBooking} />
         <ServicesPage onBook={openBooking} />
         <PackagesSection onAdd={addLine} />
         <BridalPage onBook={openBooking} />
         <MobileTanningPage onBook={openBooking} />
         <CompetitionPage />
-        <ShopPage onAdd={addProduct} onQuickView={setQuickViewProduct} />
         <GlowQuiz onBook={openBooking} onAddProducts={addProducts} />
         <PrepCarePage />
         <BeforeAfterSection />
@@ -1665,7 +1870,9 @@ export default function App() {
         onUpdate={(key, quantity) => setCart((current) => current.map((item) => (item.key === key ? { ...item, quantity } : item)))}
         onRemove={(key) => setCart((current) => current.filter((item) => item.key !== key))}
         onAddProduct={addProduct}
-        onCheckout={() => setToast('Mock checkout opened. No payment was processed.')}
+        onCheckout={startCheckout}
+        checkoutState={checkoutState}
+        checkoutError={checkoutError}
       />
       {toast && <Toast message={toast} />}
     </div>
