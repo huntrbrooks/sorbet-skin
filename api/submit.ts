@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { applyCors, parseString, rejectMethod } from './_lib/http';
-import { getSupabaseAdmin } from './_lib/supabase';
+import { applyCors, parseString, rejectMethod } from './_lib/http.js';
+import { getSupabaseAdmin } from './_lib/supabase.js';
 
 const allowedTypes = new Set([
   'booking',

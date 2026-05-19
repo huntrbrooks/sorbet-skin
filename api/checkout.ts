@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { catalogById } from './_lib/catalog';
-import { applyCors, parseString, rejectMethod, requireEnv } from './_lib/http';
-import { getStripe } from './_lib/stripe';
-import { getSupabaseAdmin } from './_lib/supabase';
+import { catalogById } from './_lib/catalog.js';
+import { applyCors, parseString, rejectMethod, requireEnv } from './_lib/http.js';
+import { getStripe } from './_lib/stripe.js';
+import { getSupabaseAdmin } from './_lib/supabase.js';
 
 type CheckoutLine = {
   id?: unknown;

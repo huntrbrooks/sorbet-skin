@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { readRawBody, requireEnv } from './_lib/http';
-import { getStripe } from './_lib/stripe';
-import { getSupabaseAdmin } from './_lib/supabase';
+import { readRawBody, requireEnv } from './_lib/http.js';
+import { getStripe } from './_lib/stripe.js';
+import { getSupabaseAdmin } from './_lib/supabase.js';
 
 export const config = {
   api: {
